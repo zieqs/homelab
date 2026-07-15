@@ -166,7 +166,7 @@ Most apps will use community charts from **bjw-s** (bjw-s-libs/app-template) or 
 2. STRIP     → Remove status, managedFields, resourceVersion, uid, ownerReferences
 3. CONVERT   → Rewrite as HelmRelease or clean Kustomize resource
 4. ENCRYPT   → sops --encrypt any secrets
-5. COMMIT    → git add && git commit && git push
+5. COMMIT    → git add && git commit (no push — you review and push manually)
 6. VERIFY    → kubectl get pods -n <ns> -w  →  pod Running  →  app accessible
 7. CLEANUP   → Delete old manual YAMLs, remove old kubectl-apply'd manifests
 ```
