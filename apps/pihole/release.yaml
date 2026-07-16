@@ -20,14 +20,19 @@ spec:
     # Storage Configuration
     # ----------------------------------------------------
     persistentVolumeClaim:
-      enabled: true            # Flip this from false to true
-      size: 5Gi                # 5 Gigabytes is plenty for gravity lists and logs
-      storageClass: "local-path" # Uses k3s's built-in storage engine
+      enabled: true            
+      size: 5Gi                
+      storageClass: "local-path" 
       
+    # ----------------------------------------------------
+    # DNS Traffic Configuration (Exposed to your LAN)
+    # ----------------------------------------------------
     serviceDns:
-      type: ClusterIP
+      type: LoadBalancer # Changed from ClusterIP so external devices can use it
 
     # ----------------------------------------------------
-    # Admin Web Interface Configuration
+    # Admin Web Interface Configuration (Correctly Nested)
     # ----------------------------------------------------
-    adminPassword: "homelab" # Change this to a secure
+    admin:
+      enabled: true
+      password: "homelab"
