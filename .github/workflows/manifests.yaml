@@ -1,0 +1,78 @@
+name: Manifests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kustomize
+        run: |
+          curl -sL "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+          sudo mv kustomize /usr/local/bin/
+
+      - name: Install kubeconform
+        run: |
+          curl -sL "https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz" | tar xz
+          sudo mv kubeconform /usr/local/bin/
+
+      - name: Validate all overlays
+        run: |
+          failed=0
+          for dir in apps/*/ infrastructure/*/; do
+            echo "=== $dir ==="
+            if kustomize build "$dir" 2>/dev/null | kubeconform \
+              -kubernetes-version 1.28 \
+              -strict \
+              -ignore-missing-schemas \
+              -summary; then
+              echo "  OK $dir"
+            else
+              echo "  FAIL $dir"
+              failed=1
+            fi
+          done
+          exit $failed
+
+  sops-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install sops
+        run: |
+          curl -sL "https://github.com/mozilla/sops/releases/latest/download/sops-amd64-linux" -o sops
+          chmod +x sops
+          sudo mv sops /usr/local/bin/
+          sops --version
+
+      - name: Import age key
+        env:
+          AGE_SECRET_KEY: ${{ secrets.AGE_SECRET_KEY }}
+        run: |
+          mkdir -p ~/.config/sops/age
+          echo "$AGE_SECRET_KEY" > ~/.config/sops/age/keys.txt
+          chmod 600 ~/.config/sops/age/keys.txt
+
+      - name: Verify encrypted secrets
+        run: |
+          failed=0
+          for f in $(find . -name '*.enc.yaml'); do
+            echo "=== $f ==="
+            if sops --decrypt "$f" > /dev/null; then
+              echo "  OK $f"
+            else
+              echo "  FAIL $f"
+              failed=1
+            fi
+          done
+          exit $failed
