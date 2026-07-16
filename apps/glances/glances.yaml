@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: glances-agent
+  namespace: kube-system
+  labels:
+    app: glances
+spec:
+  selector:
+    matchLabels:
+      app: glances
+  template:
+    metadata:
+      labels:
+        app: glances
+    spec:
+      hostPID: true
+      containers:
+        - name: glances
+          image: nicolargo/glances:latest-full
+          env:
+            - name: GLANCES_OPT
+              value: "-w"
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+          ports:
+            - name: web
+              containerPort: 61208
+              protocol: TCP
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: var-run-docker
+              mountPath: /var/run/docker.sock
+              readOnly: true
+            - name: host-root
+              mountPath: /host
+              readOnly: true
+      volumes:
+        - name: var-run-docker
+          hostPath:
+            path: /var/run/docker.sock
+        - name: host-root
+          hostPath:
+            path: /
+---
+# 🎯 Service 1: Locks traffic strictly to the MASTER node
+apiVersion: v1
+kind: Service
+metadata:
+  name: glances-master-svc
+  namespace: kube-system
+spec:
+  ports:
+    - name: http
+      port: 61208
+      targetPort: 61208
+  selector:
+    app: glances
+  # CRITICAL: This topology key ensures traffic stays on the node it entered
+  internalTrafficPolicy: Local
+---
+# 🎯 Service 2: Locks traffic strictly to the WORKER node
+apiVersion: v1
+kind: Service
+metadata:
+  name: glances-worker-svc
+  namespace: kube-system
+spec:
+  ports:
+    - name: http
+      port: 61208
+      targetPort: 61208
+  selector:
+    app: glances
+  internalTrafficPolicy: Local
