@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pihole-web
+  namespace: networking
+  annotations:
+    # Tells Kubernetes to use the built-in Traefik controller
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: pihole.zieqs.online # Change to your preferred local domain
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                # The Helm chart names the web service "pihole-web"
+                name: pihole-web 
+                port:
+                  number: 80
