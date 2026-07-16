@@ -1,0 +1,142 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: homelab-worker1   # <-- Target the worker node
+      containers:
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+            - name: WEBUI_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+              name: webui
+          volumeMounts:
+            - name: app-config
+              mountPath: /config
+              subPath: qbittorrent
+            - name: download-pool
+              mountPath: /downloads
+      volumes:
+        - name: app-config
+          hostPath:
+            path: /mnt/sata-storage/HDD2-share/media-stack          # <-- Points to the NFS mount on worker
+            type: Directory
+        - name: download-pool
+          hostPath:
+            path: /mnt/sata-storage/HDD2-share/media-stack/downloads # <-- Points to the NFS mount on worker
+            type: DirectoryOrCreate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: homelab
+      containers:
+        - name: prowlarr
+          image: lscr.io/linuxserver/prowlarr:latest
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+          ports:
+            - containerPort: 9696
+              name: webui
+          volumeMounts:
+            - name: app-config
+              mountPath: /config
+              subPath: prowlarr        # Keeps your prowlarr indexer configurations safe
+      volumes:
+        - name: app-config
+          hostPath:
+            path: /mnt/HDD2/media-stack
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: qbittorrent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 9696
+      targetPort: 9696
+  selector:
+    app: prowlarr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: media-ingress
+  namespace: media
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: qbit.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qbittorrent-svc
+                port:
+                  number: 8080
+    - host: prowlarr.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prowlarr-svc
+                port:
+                  number: 9696
