@@ -34,6 +34,7 @@ spec:
     # Admin Web Interface Configuration (Correctly Nested)
     # ----------------------------------------------------
     admin:
+      # Enable the admin web interface
       enabled: true
-      existingSecret: "pihole-secret" # The name of your K8s secret
-      passwordKey: "password"         # The key inside the secret
+      # Set the admin password (replace with your desired password)
+      password: ""  # Replace with a secure password
