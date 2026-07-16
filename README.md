@@ -15,6 +15,7 @@ A GitOps-driven Kubernetes homelab. Everything lives in this repo, and [Flux CD]
 | **Radarr / Sonarr / Jellyseerr / Bazarr** | `media` | Radarr at `radarr.zieqs.online`, Sonarr at `sonarr.zieqs.online` (scaled to 0), Jellyseerr at `seerr.zieqs.online`, Bazarr at `bazarr.zieqs.online`. |
 | **qBittorrent / Prowlarr** | `media` | Torrent client at `qbit.zieqs.online` (worker node), indexer manager at `prowlarr.zieqs.online` (master node). |
 | **[CouchDB](https://couchdb.apache.org/)** 3.4.2 | `obsidian` | [Obsidian Livesync](https://github.com/vrtmrz/obsidian-livesync) backend at `couchdb.zieqs.online`. 10Gi PVC, credentials in a SOPS-encrypted secret. |
+| **RLCraft** (Minecraft) | `games` | Forge 1.12.2 modded server on the worker node (8G RAM). Exposed via [playit.gg](https://playit.gg) tunnel sidecar. Secret encrypted with SOPS. |
 
 ## Architecture
 
@@ -23,7 +24,7 @@ A GitOps-driven Kubernetes homelab. Everything lives in this repo, and [Flux CD]
 │                  GitHub                          │
 │   github.com/zieqs/homelab                      │
 │   ├── apps/     (pihole, glances, homarr,       │
-│   │              media, obsidian)                │
+│   │              media, obsidian, minecraft)     │
 │   ├── infrastructure/ (tailscale, cloudflared)   │
 │   └── clusters/ (Flux Kustomizations + SOPS)    │
 └──────────────┬──────────────────────────────────┘
@@ -44,12 +45,13 @@ A GitOps-driven Kubernetes homelab. Everything lives in this repo, and [Flux CD]
 │  │  Pi-hole     │  Prowlarr │  │  Jellyfin (GPU)  │
 │  │  Glances     │  CouchDB  │  │  qBittorrent     │
 │  │  Radarr      │  Homarr   │  │  Glances-worker  │
-│  │  Sonarr      │  Bazarr   │  │                   │
+│  │  Sonarr      │  Bazarr   │  │  RLCraft (MC)     │
 │  │  Jellyseerr  │           │  │                   │
 │  └──────────────────────────┘  └───────────────────┘
 │                                                  │
 │  Tailscale (mesh + subnet route 192.168.0.0/24) │
 │  Cloudflare Tunnel (external ingress)            │
+│  playit.gg (Minecraft tunnel)                    │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -64,7 +66,8 @@ homelab/
 │   ├── glances/              # Glances master + worker deployments
 │   ├── homarr/               # Homarr dashboard + encrypted secret
 │   ├── media/                # Full media stack (Jellyfin, *arr, qBittorrent)
-│   └── obsidian/             # CouchDB + encrypted secret
+│   ├── obsidian/             # CouchDB + encrypted secret
+│   └── minecraft/            # RLCraft server + playit.gg tunnel + encrypted secret
 ├── clusters/
 │   └── homelab/              # Flux Kustomizations (each with SOPS decryption)
 │       ├── flux-system/      # Bootstrapped Flux components
@@ -73,6 +76,7 @@ homelab/
 │       ├── app-homarr.yaml
 │       ├── app-media.yaml
 │       ├── app-obsidian.yaml
+│       ├── app-minecraft.yaml
 │       ├── infra-tailscale.yaml
 │       └── infra-cloudflared.yaml
 └── infrastructure/
@@ -110,6 +114,7 @@ kubectl create secret generic sops-age \
 | Homarr | `homarr-secret` | `SECRET_ENCRYPTION_KEY` |
 | CouchDB | `couchdb-secret` | `COUCHDB_USER` + `COUCHDB_PASSWORD` |
 | Cloudflare Tunnel | `cloudflared-secret` | Tunnel token |
+| RLCraft | `rlcraft-secret` | playit.gg tunnel `SECRET_KEY` |
 
 ## Prerequisites
 
@@ -208,6 +213,20 @@ kubectl create secret generic sops-age \
 - 10Gi PVC, credentials in a SOPS-encrypted secret
 - Ingress at `couchdb.zieqs.online`
 
+### RLCraft Minecraft (`apps/minecraft/`)
+
+- **Image:** `itzg/minecraft-server:java8-multiarch` running Forge 1.12.2
+- **Node:** Pinned to `homelab-worker1` with 8G RAM allocation
+- **Storage:** HostPath at `/mnt/sata-storage/minecraft-data`
+- **Tunnel:** A [playit.gg](https://playit.gg) sidecar container exposes the server externally. Its secret key is stored in a SOPS-encrypted secret.
+- **Service:** `ClusterIP` (playit handles external traffic)
+
+### CI/CD
+
+A GitHub Actions workflow (`.github/workflows/manifests.yaml`) runs on every push and PR to `main`:
+- **validate** — builds every `apps/*/` and `infrastructure/*/` overlay with Kustomize, strips SOPS stanzas, and validates manifests with kubeconform
+- **sops-check** — imports the `AGE_SECRET_KEY` repository secret and verifies all `*.enc.yaml` files can be decrypted
+
 ### Sync Intervals
 
 | Resource | Interval |
@@ -215,7 +234,7 @@ kubectl create secret generic sops-age \
 | GitRepository (Git poll) | 1 minute |
 | Root Kustomization | 10 minutes |
 | Pi-hole Kustomization | 60 seconds |
-| Media / Homarr / Obsidian / Glances Kustomizations | 5 minutes |
+| Media / Homarr / Obsidian / Glances / Minecraft Kustomizations | 5 minutes |
 | Tailscale / Cloudflared Kustomizations | 10 minutes |
 | HelmReleases (chart updates) | 1–2 hours |
 
