@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rlcraft-server
+  namespace: games
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: homelab-worker1
+      containers:
+        # Container 1: The RLCraft Modded Server
+        - name: minecraft
+          image: itzg/minecraft-server:java8-multiarch
+          ports:
+            - containerPort: 25565
+              name: mc-port
+          env:
+            - name: EULA
+              value: "TRUE"
+            - name: TYPE
+              value: "FORGE"
+            - name: VERSION
+              value: "1.12.2"
+            - name: FORGE_VERSION
+              value: "14.23.5.2860"
+            - name: MEMORY
+              value: "8G"
+            - name: USE_AIKAR_FLAGS
+              value: "true"
+            - name: ENABLE_COMMAND_BLOCK
+              value: "true"
+            - name: ONLINE_MODE
+              value: "false"
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+          resources:
+            requests:
+              memory: "8Gi"
+              cpu: "1.5"
+            limits:
+              memory: "9Gi"
+          volumeMounts:
+            - name: mc-data
+              mountPath: /data
+
+        # Container 2: The Playit.gg Tunnel Sidecar
+        - name: playit-agent
+          image: ghcr.io/playit-cloud/playit-agent:0.17
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rlcraft-secret
+                  key: SECRET_KEY
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "0.2"
+
+      volumes:
+        - name: mc-data
+          hostPath:
+            path: /mnt/sata-storage/minecraft-data
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-svc
+  namespace: games
+spec:
+  type: ClusterIP # <-- Changed to ClusterIP since playit handles external traffic now!
+  ports:
+    - port: 25565
+      targetPort: 25565
+      name: mc-port
+  selector:
+    app: minecraft
