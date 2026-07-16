@@ -1,20 +1,24 @@
+# 🖥️ GLANCES MASTER NODE WORKLOAD
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
-  name: glances-agent
+  name: glances-master
   namespace: kube-system
   labels:
-    app: glances
+    app: glances-master
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: glances
+      app: glances-master
   template:
     metadata:
       labels:
-        app: glances
+        app: glances-master
     spec:
       hostPID: true
+      nodeSelector:
+        kubernetes.io/hostname: homelab  # <-- Pins to Master Node
       containers:
         - name: glances
           image: nicolargo/glances:latest-full
@@ -44,7 +48,57 @@ spec:
           hostPath:
             path: /
 ---
-# 🎯 Service 1: Locks traffic strictly to the MASTER node
+# 🖥️ GLANCES WORKER NODE WORKLOAD
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glances-worker
+  namespace: kube-system
+  labels:
+    app: glances-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: glances-worker
+  template:
+    metadata:
+      labels:
+        app: glances-worker
+    spec:
+      hostPID: true
+      nodeSelector:
+        kubernetes.io/hostname: homelab-worker1  # <-- Pins to Worker Node
+      containers:
+        - name: glances
+          image: nicolargo/glances:latest-full
+          env:
+            - name: GLANCES_OPT
+              value: "-w"
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+          ports:
+            - name: web
+              containerPort: 61208
+              protocol: TCP
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: var-run-docker
+              mountPath: /var/run/docker.sock
+              readOnly: true
+            - name: host-root
+              mountPath: /host
+              readOnly: true
+      volumes:
+        - name: var-run-docker
+          hostPath:
+            path: /var/run/docker.sock
+        - name: host-root
+          hostPath:
+            path: /
+---
+# 🎯 Service targeting ONLY the Master Node
 apiVersion: v1
 kind: Service
 metadata:
@@ -56,11 +110,9 @@ spec:
       port: 61208
       targetPort: 61208
   selector:
-    app: glances
-  # CRITICAL: This topology key ensures traffic stays on the node it entered
-  internalTrafficPolicy: Local
+    app: glances-master # <-- Targets ONLY the master deployment
 ---
-# 🎯 Service 2: Locks traffic strictly to the WORKER node
+# 🎯 Service targeting ONLY the Worker Node
 apiVersion: v1
 kind: Service
 metadata:
@@ -72,5 +124,4 @@ spec:
       port: 61208
       targetPort: 61208
   selector:
-    app: glances
-  internalTrafficPolicy: Local
+    app: glances-worker # <-- Targets ONLY the worker deployment
