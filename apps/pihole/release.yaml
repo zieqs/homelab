@@ -37,4 +37,4 @@ spec:
       # Enable the admin web interface
       enabled: true
       # Set the admin password (replace with your desired password)
-      password: "homelab"  # Replace with a secure password
+      adminPassword: "homelab"  # Replace with a secure password
