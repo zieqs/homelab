@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: homarr-data-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homarr
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homarr
+  template:
+    metadata:
+      labels:
+        app: homarr
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: homelab
+      containers:
+        - name: homarr
+          image: ghcr.io/homarr-labs/homarr:latest
+          ports:
+            - containerPort: 7575
+              name: http
+          # 👇 ADD THIS ENV BLOCK HERE
+          env:
+            - name: SECRET_ENCRYPTION_KEY
+              value: "d2313298ea3183f6355cbbdc8b62c64181ef8e4f23be54238fb68a63d7af6436"
+          volumeMounts:
+            - name: homarr-storage
+              mountPath: /appdata
+      volumes:
+        - name: homarr-storage
+          persistentVolumeClaim:
+            claimName: homarr-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homarr-web-svc
+  namespace: monitoring
+spec:
+  ports:
+    - name: http
+      port: 7575
+      targetPort: 7575
+  selector:
+    app: homarr
