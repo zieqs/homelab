@@ -25,12 +25,18 @@ jobs:
           curl -sL "https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz" | tar xz
           sudo mv kubeconform /usr/local/bin/
 
+      - name: Install yq
+        run: |
+          curl -sL "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64" -o yq
+          chmod +x yq
+          sudo mv yq /usr/local/bin/
+
       - name: Validate all overlays
         run: |
           failed=0
           for dir in apps/*/ infrastructure/*/; do
             echo "=== $dir ==="
-            if kustomize build "$dir" 2>/dev/null | kubeconform \
+            if kustomize build "$dir" 2>/dev/null | yq eval 'del(.sops)' - | kubeconform \
               -kubernetes-version 1.28.0 \
               -strict \
               -ignore-missing-schemas \
