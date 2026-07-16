@@ -31,7 +31,7 @@ jobs:
           for dir in apps/*/ infrastructure/*/; do
             echo "=== $dir ==="
             if kustomize build "$dir" 2>/dev/null | kubeconform \
-              -kubernetes-version 1.28 \
+              -kubernetes-version 1.28.0 \
               -strict \
               -ignore-missing-schemas \
               -summary; then
@@ -50,7 +50,8 @@ jobs:
 
       - name: Install sops
         run: |
-          curl -sL "https://github.com/mozilla/sops/releases/latest/download/sops-amd64-linux" -o sops
+          VERSION=$(curl -s https://api.github.com/repos/mozilla/sops/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | cut -d'v' -f2)
+          curl -sL "https://github.com/mozilla/sops/releases/download/v${VERSION}/sops-${VERSION}.linux.amd64" -o sops
           chmod +x sops
           sudo mv sops /usr/local/bin/
           sops --version
