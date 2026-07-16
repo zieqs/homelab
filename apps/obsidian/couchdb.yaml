@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: obsidian
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: couchdb-data-pvc
+  namespace: obsidian
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb
+  namespace: obsidian
+  labels:
+    app: couchdb
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: couchdb
+  template:
+    metadata:
+      labels:
+        app: couchdb
+    spec:
+      containers:
+        - name: couchdb
+          image: couchdb:3.4.2
+          env:
+            - name: COUCHDB_USER
+              value: "zieqs"
+            - name: COUCHDB_PASSWORD
+              value: "Hazieq02@"
+          ports:
+            - containerPort: 5984
+              name: couchdb-port
+          volumeMounts:
+            - name: couchdb-storage
+              mountPath: /opt/couchdb/data
+      volumes:
+        - name: couchdb-storage
+          persistentVolumeClaim:
+            claimName: couchdb-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb-svc
+  namespace: obsidian
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5984
+      targetPort: 5984
+  selector:
+    app: couchdb
