@@ -26,3 +26,8 @@ spec:
       
     serviceDns:
       type: ClusterIP
+
+    # ----------------------------------------------------
+    # Admin Web Interface Configuration
+    # ----------------------------------------------------
+    adminPassword: "homelab" # Change this to a secure
