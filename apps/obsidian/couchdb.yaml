@@ -35,9 +35,15 @@ spec:
           image: couchdb:3.4.2
           env:
             - name: COUCHDB_USER
-              value: "zieqs"
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb-secret
+                  key: COUCHDB_USER
             - name: COUCHDB_PASSWORD
-              value: "Hazieq02@"
+              valueFrom:
+                secretKeyRef:
+                  name: couchdb-secret
+                  key: COUCHDB_PASSWORD
           ports:
             - containerPort: 5984
               name: couchdb-port

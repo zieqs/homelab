@@ -18,4 +18,10 @@ spec:
       containers:
         - name: cloudflared
           image: cloudflare/cloudflared:latest
-          command: ["cloudflared", "tunnel", "--no-autoupdate", "run", "--token", "eyJhIjoiNDVhM2RkYTcyNGFhOTk5MzE1NzI2OTY5NDJhNzhkYjQiLCJ0IjoiZThjNjNlYjktYjg3NC00MzYxLTg0ZjEtNjM4NzIwMzY0NjRjIiwicyI6IllUZGtOMll6WW1JdFlUQTVOeTAwT0dFMUxUaGhNall0TURneE9UTXdNR1ptTVRKayJ9"]
+          command: ["cloudflared", "tunnel", "--no-autoupdate", "run", "--token", "$(CLOUDFLARED_TOKEN)"]
+          env:
+            - name: CLOUDFLARED_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflared-secret
+                  key: token

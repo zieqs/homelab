@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - cloudflared.yaml
-  
+  - secrets/cloudflared-secret.enc.yaml

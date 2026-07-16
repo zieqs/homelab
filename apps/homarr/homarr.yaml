@@ -33,10 +33,12 @@ spec:
           ports:
             - containerPort: 7575
               name: http
-          # 👇 ADD THIS ENV BLOCK HERE
           env:
             - name: SECRET_ENCRYPTION_KEY
-              value: "d2313298ea3183f6355cbbdc8b62c64181ef8e4f23be54238fb68a63d7af6436"
+              valueFrom:
+                secretKeyRef:
+                  name: homarr-secret
+                  key: SECRET_ENCRYPTION_KEY
           volumeMounts:
             - name: homarr-storage
               mountPath: /appdata

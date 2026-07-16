@@ -5,3 +5,4 @@ resources:
   - namespace.yaml
   - couchdb.yaml
   - ingress.yaml
+  - secrets/couchdb-secret.enc.yaml

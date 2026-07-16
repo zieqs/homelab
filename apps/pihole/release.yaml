@@ -34,7 +34,11 @@ spec:
     # Admin Web Interface Configuration 
     # ----------------------------------------------------
     # Set the admin password
-    adminPassword: "homelab"
+    adminPassword: 
+      valueFrom:
+        secretKeyRef:
+          name: pihole-secret
+          key: adminPassword
     admin:
       # Enable the admin web interface
       enabled: true

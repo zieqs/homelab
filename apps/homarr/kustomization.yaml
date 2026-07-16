@@ -5,3 +5,4 @@ resources:
   - namespace.yaml
   - homarr.yaml
   - ingress.yaml
+  - secrets/homarr-secret.enc.yaml
