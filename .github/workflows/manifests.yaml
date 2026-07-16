@@ -56,8 +56,8 @@ jobs:
 
       - name: Install sops
         run: |
-          VERSION=$(curl -s https://api.github.com/repos/mozilla/sops/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | cut -d'v' -f2)
-          curl -sL "https://github.com/mozilla/sops/releases/download/v${VERSION}/sops-${VERSION}.linux.amd64" -o sops
+          VERSION=$(curl -sL https://api.github.com/repos/mozilla/sops/releases/latest | grep '"tag_name"' | cut -d'"' -f4 | cut -d'v' -f2)
+          curl -sL "https://github.com/mozilla/sops/releases/download/v${VERSION}/sops-v${VERSION}.linux.amd64" -o sops
           chmod +x sops
           sudo mv sops /usr/local/bin/
           sops --version
