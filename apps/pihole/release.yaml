@@ -16,29 +16,18 @@ spec:
       interval: 1h
   interval: 1h
   values:
-    # ----------------------------------------------------
-    # Storage Configuration
-    # ----------------------------------------------------
     persistentVolumeClaim:
-      enabled: true            
-      size: 5Gi                
-      storageClass: "local-path" 
-      
-    # ----------------------------------------------------
-    # DNS Traffic Configuration (Exposed to your LAN)
-    # ----------------------------------------------------
-    serviceDns:
-      type: LoadBalancer # Changed from ClusterIP so external devices can use it
-
-    # ----------------------------------------------------
-    # Admin Web Interface Configuration 
-    # ----------------------------------------------------
-    # Set the admin password
-    adminPassword: 
-      valueFrom:
-        secretKeyRef:
-          name: pihole-secret
-          key: adminPassword
-    admin:
-      # Enable the admin web interface
       enabled: true
+      size: 5Gi
+      storageClass: "local-path"
+
+    serviceDns:
+      type: LoadBalancer
+
+    admin:
+      enabled: true
+  valuesFrom:
+    - kind: Secret
+      name: pihole-secret
+      valuesKey: adminPassword
+      targetPath: adminPassword
