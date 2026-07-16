@@ -31,10 +31,10 @@ spec:
       type: LoadBalancer # Changed from ClusterIP so external devices can use it
 
     # ----------------------------------------------------
-    # Admin Web Interface Configuration (Correctly Nested)
+    # Admin Web Interface Configuration 
     # ----------------------------------------------------
+    # Set the admin password
+    adminPassword: "homelab"
     admin:
       # Enable the admin web interface
       enabled: true
-      # Set the admin password (replace with your desired password)
-      adminPassword: "homelab"  # Replace with a secure password
