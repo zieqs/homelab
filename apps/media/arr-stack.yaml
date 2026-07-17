@@ -119,9 +119,13 @@ spec:
     spec:
       nodeSelector:
         kubernetes.io/hostname: homelab
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
       containers:
         - name: jellyseerr
-          image: fallenbagel/jellyseerr:latest
+          image: seerr/seerr:latest
           env:
             - name: LOG_LEVEL
               value: "debug"
