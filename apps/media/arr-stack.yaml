@@ -120,22 +120,22 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: homelab
       
-      # 1. Pod-level security (handles volume mount permissions)
-      podSecurityContext:
+      # 1. Pod-level security (FIXED: changed 'podSecurityContext' to 'securityContext')
+      securityContext:
         fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch   # More efficient than always recursing
+        fsGroupChangePolicy: OnRootMismatch   # Excellent choice! Speeds up starting times immensely.
       
       containers:
         - name: jellyseerr
-          image: seerr/seerr:latest  # KEEP THIS - your image is correct!
+          image: seerr/seerr:latest
           
-          # 2. Container-level security (hardens the running process)
+          # 2. Container-level security
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-            readOnlyRootFilesystem: false   # Must be false because it writes to /app/config
+            readOnlyRootFilesystem: false   # Correct, Seerr needs write access here
             runAsNonRoot: true
             privileged: false
             runAsUser: 1000
