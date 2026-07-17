@@ -31,11 +31,12 @@ spec:
         enabled: true
         existingClaim: "vaultwarden-data-pvc"
     ingress:
-      enabled: true
-      annotations:
-        traefik.ingress.kubernetes.io/router.entrypoints: web
-      hosts:
-        - host: vaultwarden.zieqs.online 
-          paths:
-            - path: /
-              pathType: ImplementationSpecific
+      main: # Added this key to satisfy the k8s-at-home library requirements
+        enabled: true
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: web
+        hosts:
+          - host: vaultwarden.zieqs.online 
+            paths:
+              - path: /
+                pathType: ImplementationSpecific
