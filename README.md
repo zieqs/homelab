@@ -12,10 +12,11 @@ A GitOps-driven Kubernetes homelab. Everything lives in this repo, and [Flux CD]
 | **[Glances](https://nicolargo.github.io/glances/)** | `kube-system` | System monitoring — master at `glancesmaster.zieqs.online`, worker at `glancesworkerone.zieqs.online`. |
 | **[Homarr](https://homarr.dev/)** | `monitoring` | Dashboard / startpage at `homarr.zieqs.online`. Encryption key stored in a SOPS-encrypted secret. |
 | **[Jellyfin](https://jellyfin.org/)** | `media` | Media server at `jellyfin.zieqs.online` with GPU passthrough on the worker node. |
-| **Radarr / Sonarr / Jellyseerr / Bazarr** | `media` | Radarr at `radarr.zieqs.online`, Sonarr at `sonarr.zieqs.online` (scaled to 0), Jellyseerr at `seerr.zieqs.online`, Bazarr at `bazarr.zieqs.online`. |
+| **Radarr / Sonarr / Seerr / Bazarr** | `media` | Radarr at `radarr.zieqs.online`, Sonarr at `sonarr.zieqs.online` (scaled to 0), Seerr at `seerr.zieqs.online`, Bazarr at `bazarr.zieqs.online`. |
 | **qBittorrent / Prowlarr** | `media` | Torrent client at `qbit.zieqs.online` (worker node), indexer manager at `prowlarr.zieqs.online` (master node). |
 | **[CouchDB](https://couchdb.apache.org/)** 3.4.2 | `obsidian` | [Obsidian Livesync](https://github.com/vrtmrz/obsidian-livesync) backend at `couchdb.zieqs.online`. 10Gi PVC, credentials in a SOPS-encrypted secret. |
 | **RLCraft** (Minecraft) | `games` | Forge 1.12.2 modded server on the worker node (8G RAM). Exposed via [playit.gg](https://playit.gg) tunnel sidecar. Secret encrypted with SOPS. |
+| **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)** | `vaultwarden` | Bitwarden-compatible password manager. Helm chart from `johanneskastl`. Ingress at `vaultwarden.zieqs.online`. 10Gi PVC. |
 
 ## Architecture
 
@@ -24,7 +25,8 @@ A GitOps-driven Kubernetes homelab. Everything lives in this repo, and [Flux CD]
 │                  GitHub                          │
 │   github.com/zieqs/homelab                      │
 │   ├── apps/     (pihole, glances, homarr,       │
-│   │              media, obsidian, minecraft)     │
+│   │              media, obsidian, minecraft,     │
+│   │              vaultwarden)                    │
 │   ├── infrastructure/ (tailscale, cloudflared)   │
 │   └── clusters/ (Flux Kustomizations + SOPS)    │
 └──────────────┬──────────────────────────────────┘
@@ -46,7 +48,7 @@ A GitOps-driven Kubernetes homelab. Everything lives in this repo, and [Flux CD]
 │  │  Glances     │  CouchDB  │  │  qBittorrent     │
 │  │  Radarr      │  Homarr   │  │  Glances-worker  │
 │  │  Sonarr      │  Bazarr   │  │  RLCraft (MC)     │
-│  │  Jellyseerr  │           │  │                   │
+│  │  Seerr       │  Vaultwarden│  │                   │
 │  └──────────────────────────┘  └───────────────────┘
 │                                                  │
 │  Tailscale (mesh + subnet route 192.168.0.0/24) │
@@ -67,7 +69,8 @@ homelab/
 │   ├── homarr/               # Homarr dashboard + encrypted secret
 │   ├── media/                # Full media stack (Jellyfin, *arr, qBittorrent)
 │   ├── obsidian/             # CouchDB + encrypted secret
-│   └── minecraft/            # RLCraft server + playit.gg tunnel + encrypted secret
+│   ├── minecraft/            # RLCraft server + playit.gg tunnel + encrypted secret
+│   └── vaultwarden/          # Vaultwarden HelmRelease + PVC + ingress
 ├── clusters/
 │   └── homelab/              # Flux Kustomizations (each with SOPS decryption)
 │       ├── flux-system/      # Bootstrapped Flux components
@@ -77,6 +80,7 @@ homelab/
 │       ├── app-media.yaml
 │       ├── app-obsidian.yaml
 │       ├── app-minecraft.yaml
+│       ├── app-vaultwarden.yaml
 │       ├── infra-tailscale.yaml
 │       └── infra-cloudflared.yaml
 └── infrastructure/
@@ -202,7 +206,7 @@ kubectl create secret generic sops-age \
 ### Media Stack (`apps/media/`)
 
 - **Jellyfin** — GPU-accelerated (`/dev/dri` passthrough) on the worker node, NFS-backed media storage
-- **Radarr / Sonarr / Jellyseerr / Bazarr** — On the master node, hostPath at `/mnt/HDD2/media-stack`. Sonarr scaled to 0.
+- **Radarr / Sonarr / Seerr / Bazarr** — On the master node, hostPath at `/mnt/HDD2/media-stack`. Sonarr scaled to 0.
 - **qBittorrent** — Worker node, downloads on NFS mount
 - **Prowlarr** — Master node for indexer management
 - All services have Traefik Ingresses on `*.zieqs.online`
@@ -221,6 +225,13 @@ kubectl create secret generic sops-age \
 - **Tunnel:** A [playit.gg](https://playit.gg) sidecar container exposes the server externally. Its secret key is stored in a SOPS-encrypted secret.
 - **Service:** `ClusterIP` (playit handles external traffic)
 
+### Vaultwarden (`apps/vaultwarden/`)
+
+- **Chart:** `johanneskastl/vaultwarden` Helm chart (^6.0.0)
+- **Storage:** 10Gi PVC for persistent data
+- **Ingress:** Traefik at `vaultwarden.zieqs.online`
+- **Secrets:** Flux Kustomization configured with SOPS decryption
+
 ### CI/CD
 
 A GitHub Actions workflow (`.github/workflows/manifests.yaml`) runs on every push and PR to `main`:
@@ -234,7 +245,7 @@ A GitHub Actions workflow (`.github/workflows/manifests.yaml`) runs on every pus
 | GitRepository (Git poll) | 1 minute |
 | Root Kustomization | 10 minutes |
 | Pi-hole Kustomization | 60 seconds |
-| Media / Homarr / Obsidian / Glances / Minecraft Kustomizations | 5 minutes |
+| Media / Homarr / Obsidian / Glances / Minecraft / Vaultwarden Kustomizations | 5 minutes |
 | Tailscale / Cloudflared Kustomizations | 10 minutes |
 | HelmReleases (chart updates) | 1–2 hours |
 
