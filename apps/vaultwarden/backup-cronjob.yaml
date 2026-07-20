@@ -47,9 +47,6 @@ spec:
                   echo "Pruning old snapshots..."
                   restic forget --keep-weekly 4 --prune
 
-                  echo "Fixing permissions..."
-                  chown -R 1000:1000 /backup
-
                   echo "Backup complete!"
               env:
                 - name: RESTIC_PASSWORD
