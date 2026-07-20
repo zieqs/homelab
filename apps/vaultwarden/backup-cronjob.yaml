@@ -33,17 +33,16 @@ spec:
                   echo "Backing up SQLite database..."
                   sqlite3 /data/db.sqlite3 ".backup /tmp/vw-backup/db.sqlite3"
 
-                  echo "Copying config..."
-                  cp /data/config.json /tmp/vw-backup/
+                  echo "Copying config (if present)..."
+                  test -f /data/config.json && cp /data/config.json /tmp/vw-backup/
 
                   echo "Running restic backup..."
-                  restic backup \
-                    /tmp/vw-backup/db.sqlite3 \
-                    /tmp/vw-backup/config.json \
-                    /data/attachments \
-                    /data/sends \
-                    /data/rsa_key* \
-                    --hostname vaultwarden
+                  BACKUP_PATHS="/tmp/vw-backup/db.sqlite3"
+                  test -f /tmp/vw-backup/config.json && BACKUP_PATHS="$BACKUP_PATHS /tmp/vw-backup/config.json"
+                  test -d /data/attachments && BACKUP_PATHS="$BACKUP_PATHS /data/attachments"
+                  test -d /data/sends && BACKUP_PATHS="$BACKUP_PATHS /data/sends"
+                  test -f /data/rsa_key.pem && BACKUP_PATHS="$BACKUP_PATHS /data/rsa_key.pem"
+                  restic backup $BACKUP_PATHS --hostname vaultwarden
 
                   echo "Pruning old snapshots..."
                   restic forget --keep-weekly 4 --prune
