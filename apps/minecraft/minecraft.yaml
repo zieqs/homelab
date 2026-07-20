@@ -28,7 +28,7 @@ spec:
               value: "TRUE"
             # Configured to automatically download Seaopolis via CurseForge
             - name: TYPE
-              value: "CURSEFORGE"
+              value: "AUTO_CURSEFORGE"
             - name: CF_PAGE_URL
               value: "https://www.curseforge.com/minecraft/modpacks/seaopolis-submerged"
             - name: CF_API_KEY
