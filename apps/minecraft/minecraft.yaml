@@ -44,12 +44,14 @@ spec:
               value: "false"
             - name: TZ
               value: "Asia/Kuala_Lumpur"
+            - name: LEVEL_TYPE
+              value: "skyblockbuilder:skyblock"
           resources:
             requests:
-              memory: "6Gi"
+              memory: "8Gi"
               cpu: "2.0"
             limits:
-              memory: "9Gi"
+              memory: "10Gi"
           volumeMounts:
             - name: mc-data
               mountPath: /data
@@ -64,15 +66,17 @@ spec:
                   name: minecraft-secret
                   key: SECRET_KEY
           resources:
+            requests:
+              memory: "32Mi"
+              cpu: "0.05"
             limits:
               memory: "128Mi"
               cpu: "0.2"
 
       volumes:
         - name: mc-data
-          hostPath:
-            path: /mnt/sata-storage/minecraft-data
-            type: Directory
+          persistentVolumeClaim:
+            claimName: minecraft-pvc
 ---
 apiVersion: v1
 kind: Service
