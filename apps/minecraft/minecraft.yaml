@@ -46,7 +46,7 @@ spec:
               value: "Asia/Kuala_Lumpur"
           resources:
             requests:
-              memory: "8Gi"
+              memory: "6Gi"
               cpu: "2.0"
             limits:
               memory: "10Gi"
