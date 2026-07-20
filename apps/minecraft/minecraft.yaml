@@ -4,7 +4,7 @@ metadata:
   name: minecraft-server
   namespace: games
 spec:
-  replicas: 1 # FIXED: Scaled up to 1 replica
+  replicas: 1
   selector:
     matchLabels:
       app: minecraft
@@ -13,13 +13,12 @@ spec:
       labels:
         app: minecraft
     spec:
-      # Optional: Remove nodeSelector unless you strictly need to lock it to this node
       nodeSelector:
         kubernetes.io/hostname: homelab-worker1
       containers:
-        # Container 1: Forge Server + Create Mod
+        # Container 1: Minecraft Server with Auto CurseForge Modpack Engine
         - name: minecraft
-          image: itzg/minecraft-server:java17
+          image: itzg/minecraft-server:java21  # Recommended for MC 1.21.1
           tty: true
           stdin: true
           ports:
@@ -28,17 +27,12 @@ spec:
           env:
             - name: EULA
               value: "TRUE"
-            - name: TYPE
-              value: "FORGE"
-            - name: VERSION
-              value: "1.20.1"
-            - name: FORGE_VERSION
-              value: "47.3.0"
             
-            # FIXED: Correct variable for single CurseForge mods
-            # You can pass the slug ('create'), project ID, or URL
-            - name: CURSEFORGE_FILES
-              value: "create"
+            # Using AUTO_CURSEFORGE manages the NeoForge installer + modpack setup automatically
+            - name: TYPE
+              value: "AUTO_CURSEFORGE"
+            - name: CF_SLUG
+              value: "create-ultimate-selection-2"
 
             - name: CF_API_KEY
               valueFrom:
@@ -46,9 +40,9 @@ spec:
                   name: cf-api-key
                   key: CF_API_KEY
             
-            # Java Memory Optimization
+            # Heavy 1.21.1 Modpack memory tuning
             - name: MEMORY
-              value: "6G"
+              value: "8G"
             - name: USE_AIKAR_FLAGS
               value: "true"
             - name: ENABLE_COMMAND_BLOCK
@@ -59,16 +53,16 @@ spec:
               value: "Asia/Kuala_Lumpur"
           resources:
             requests:
-              memory: "6Gi"
-              cpu: "1500m"
-            limits:
               memory: "8Gi"
-              cpu: "4000m" # Added CPU limit so Forge doesn't starve the host
+              cpu: "2000m"
+            limits:
+              memory: "10Gi"
+              cpu: "4000m"
           volumeMounts:
             - name: mc-data
               mountPath: /data
 
-        # Container 2: Playit.gg Tunnel Sidecar
+        # Container 2: Playit.gg Tunnel Sidecar (For External Friends)
         - name: playit-agent
           image: ghcr.io/playit-cloud/playit-agent:0.17
           env:
@@ -83,7 +77,7 @@ spec:
               cpu: "50m"
             limits:
               memory: "128Mi"
-              cpu: "500m" # FIXED: Increased CPU ceiling to prevent start-up timeout crashes
+              cpu: "500m"
 
       volumes:
         - name: mc-data
@@ -97,10 +91,11 @@ metadata:
   name: minecraft-svc
   namespace: games
 spec:
-  type: ClusterIP
+  type: NodePort # Exposed for Local LAN access
   ports:
     - port: 25565
       targetPort: 25565
+      nodePort: 30565 # Fixed LAN port (Must be between 30000-32767)
       name: mc-port
   selector:
     app: minecraft
