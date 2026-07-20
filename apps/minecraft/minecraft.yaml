@@ -18,7 +18,6 @@ spec:
       containers:
         # Container 1: The Seaopolis Submerged Modded Server
         - name: minecraft
-          # Updated to Java 17 for Minecraft 1.20.1
           image: itzg/minecraft-server:java17
           ports:
             - containerPort: 25565
@@ -26,16 +25,13 @@ spec:
           env:
             - name: EULA
               value: "TRUE"
-            # Configured to automatically download Seaopolis via CurseForge
+            # 1. CHANGED: Switched TYPE to CURSEFORGE
             - name: TYPE
-              value: "AUTO_CURSEFORGE"
-            - name: CF_PAGE_URL
-              value: "https://www.curseforge.com/minecraft/modpacks/seaopolis-submerged"
-            - name: CF_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: cf-api-key
-                  key: CF_API_KEY
+              value: "CURSEFORGE"
+            # 2. ADDED: Direct URL to official Seaopolis Submerged server zip (Bypasses API Key)
+            - name: CF_SERVER_MOD
+              value: "https://edge.forgecdn.net/files/5370/362/Seaopolis_Submerged_Server_Pack_1.0.zip"
+            # 3. REMOVED: CF_PAGE_URL and CF_API_KEY secret references
             - name: MEMORY
               value: "8G"
             - name: USE_AIKAR_FLAGS
@@ -82,7 +78,7 @@ metadata:
   name: minecraft-svc
   namespace: games
 spec:
-  type: ClusterIP # <-- Changed to ClusterIP since playit handles external traffic now!
+  type: ClusterIP
   ports:
     - port: 25565
       targetPort: 25565
