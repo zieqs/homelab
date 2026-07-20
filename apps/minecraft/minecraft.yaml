@@ -4,7 +4,7 @@ metadata:
   name: minecraft-server
   namespace: games
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: minecraft
@@ -16,9 +16,9 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: homelab-worker1
       containers:
-        # Container 1: The Seaopolis Submerged Modded Server
+        # Container 1: Forge Server + Create Mod
         - name: minecraft
-          image: itzg/minecraft-server:java17
+          image: itzg/minecraft-server:latest
           ports:
             - containerPort: 25565
               name: mc-port
@@ -26,34 +26,34 @@ spec:
             - name: EULA
               value: "TRUE"
             - name: TYPE
-              value: "AUTO_CURSEFORGE"
-            - name: CF_PAGE_URL
-              value: "https://www.curseforge.com/minecraft/modpacks/seaopolis-submerged"
+              value: "FORGE"
+            - name: VERSION
+              value: "1.20.1"
+            - name: FORGE_VERSION
+              value: "47.3.0"
+            - name: MODS
+              value: "https://www.curseforge.com/minecraft/mc-mods/create"
             - name: CF_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: cf-api-key
                   key: CF_API_KEY
             - name: MEMORY
-              value: "8G"
+              value: "6G"
             - name: USE_AIKAR_FLAGS
               value: "true"
-            - name: JVM_OPTS
-              value: "--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED"
             - name: ENABLE_COMMAND_BLOCK
               value: "true"
             - name: ONLINE_MODE
               value: "false"
             - name: TZ
               value: "Asia/Kuala_Lumpur"
-            - name: LEVEL_TYPE
-              value: "skyblockbuilder:skyblock"
           resources:
             requests:
-              memory: "8Gi"
+              memory: "6Gi"
               cpu: "2.0"
             limits:
-              memory: "10Gi"
+              memory: "8Gi"
           volumeMounts:
             - name: mc-data
               mountPath: /data
