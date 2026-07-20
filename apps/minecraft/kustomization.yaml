@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: games
 resources:
   - namespace.yaml
-  - rlcraft.yaml
-  - secrets/rlcraft-secret.enc.yaml
+  - minecraft.yaml
+  - secrets/minecraft-secret.enc.yaml
+  - secrets/cf-api-key.enc.yaml

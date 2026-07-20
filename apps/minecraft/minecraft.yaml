@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rlcraft-server
+  name: seaopolis-server
   namespace: games
 spec:
   replicas: 1
@@ -16,21 +16,26 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: homelab-worker1
       containers:
-        # Container 1: The RLCraft Modded Server
+        # Container 1: The Seaopolis Submerged Modded Server
         - name: minecraft
-          image: itzg/minecraft-server:java8-multiarch
+          # Updated to Java 17 for Minecraft 1.20.1
+          image: itzg/minecraft-server:java17
           ports:
             - containerPort: 25565
               name: mc-port
           env:
             - name: EULA
               value: "TRUE"
+            # Configured to automatically download Seaopolis via CurseForge
             - name: TYPE
-              value: "FORGE"
-            - name: VERSION
-              value: "1.12.2"
-            - name: FORGE_VERSION
-              value: "14.23.5.2860"
+              value: "CURSEFORGE"
+            - name: CF_PAGE_URL
+              value: "https://www.curseforge.com/minecraft/modpacks/seaopolis-submerged"
+            - name: CF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cf-api-key
+                  key: CF_API_KEY
             - name: MEMORY
               value: "8G"
             - name: USE_AIKAR_FLAGS
@@ -44,21 +49,21 @@ spec:
           resources:
             requests:
               memory: "8Gi"
-              cpu: "1.5"
+              cpu: "2.0"
             limits:
-              memory: "9Gi"
+              memory: "10Gi"
           volumeMounts:
             - name: mc-data
               mountPath: /data
 
-        # Container 2: The Playit.gg Tunnel Sidecar
+        # Container 2: Playit.gg Tunnel Sidecar
         - name: playit-agent
           image: ghcr.io/playit-cloud/playit-agent:0.17
           env:
             - name: SECRET_KEY
               valueFrom:
                 secretKeyRef:
-                  name: rlcraft-secret
+                  name: minecraft-secret
                   key: SECRET_KEY
           resources:
             limits:
