@@ -30,6 +30,7 @@ spec:
       data:
         enabled: true
         existingClaim: "vaultwarden-data-pvc"
+        mountPath: "/config"
     ingress:
       main: # Added this key to satisfy the k8s-at-home library requirements
         enabled: true
