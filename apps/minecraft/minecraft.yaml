@@ -49,7 +49,7 @@ spec:
               memory: "6Gi"
               cpu: "2.0"
             limits:
-              memory: "10Gi"
+              memory: "9Gi"
           volumeMounts:
             - name: mc-data
               mountPath: /data
