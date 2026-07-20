@@ -19,7 +19,7 @@ spec:
       containers:
         # Container 1: Forge Server + Create Mod
         - name: minecraft
-          image: itzg/minecraft-server:latest
+          image: itzg/minecraft-server:java17
           tty: true
           stdin: true
           ports:
