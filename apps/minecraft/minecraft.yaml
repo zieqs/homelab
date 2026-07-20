@@ -29,7 +29,7 @@ spec:
               value: "TRUE"
             
             - name: TYPE
-              value: "AUTO_CURSEFORGE"
+              value: "NEOFORGE"
             - name: CF_SLUG
               value: "create-ultimate-selection-2"
             
