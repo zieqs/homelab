@@ -25,13 +25,15 @@ spec:
           env:
             - name: EULA
               value: "TRUE"
-            # 1. CHANGED: Switched TYPE to CURSEFORGE
             - name: TYPE
               value: "CURSEFORGE"
-            # 2. ADDED: Direct URL to official Seaopolis Submerged server zip (Bypasses API Key)
-            - name: CF_SERVER_MOD
-              value: "https://edge.forgecdn.net/files/5370/362/Seaopolis_Submerged_Server_Pack_1.0.zip"
-            # 3. REMOVED: CF_PAGE_URL and CF_API_KEY secret references
+            - name: CF_PAGE_URL
+              value: "https://www.curseforge.com/minecraft/modpacks/seaopolis-submerged"
+            - name: CF_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cf-api-key
+                  key: CF_API_KEY
             - name: MEMORY
               value: "8G"
             - name: USE_AIKAR_FLAGS
