@@ -97,10 +97,11 @@ metadata:
   name: minecraft-svc
   namespace: games
 spec:
-  type: ClusterIP
+  type: NodePort # CHANGED: Exposes the port on your physical host IP
   ports:
     - port: 25565
       targetPort: 25565
+      nodePort: 25565 # CHANGED: Binds port 25565 directly to the K3s host
       name: mc-port
   selector:
     app: minecraft
