@@ -38,6 +38,8 @@ spec:
               value: "8G"
             - name: USE_AIKAR_FLAGS
               value: "true"
+            - name: JVM_OPTS
+              value: "--add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED"
             - name: ENABLE_COMMAND_BLOCK
               value: "true"
             - name: ONLINE_MODE
@@ -75,8 +77,9 @@ spec:
 
       volumes:
         - name: mc-data
-          persistentVolumeClaim:
-            claimName: minecraft-pvc
+          hostPath:
+            path: /mnt/sata-storage/minecraft-data
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
