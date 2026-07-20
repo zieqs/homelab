@@ -4,5 +4,3 @@ resources:
 - namespace.yaml
 - repository.yaml
 - vaultwarden.yaml
-- backup-cronjob.yaml
-- secrets/backup-secret.enc.yaml
