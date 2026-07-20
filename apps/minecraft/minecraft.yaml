@@ -16,9 +16,9 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: homelab-worker1
       containers:
-        # Container 1: Minecraft Server with Auto CurseForge Modpack Engine
+        # Container 1: Minecraft Server
         - name: minecraft
-          image: itzg/minecraft-server:java21  # Recommended for MC 1.21.1
+          image: itzg/minecraft-server:java21
           tty: true
           stdin: true
           ports:
@@ -28,11 +28,14 @@ spec:
             - name: EULA
               value: "TRUE"
             
-            # Using AUTO_CURSEFORGE manages the NeoForge installer + modpack setup automatically
             - name: TYPE
               value: "AUTO_CURSEFORGE"
             - name: CF_SLUG
               value: "create-ultimate-selection-2"
+            
+            # Pointing directly to the file copied into /data
+            - name: CF_MODPACK_ZIP
+              value: "/data/modpack.zip"
 
             - name: CF_API_KEY
               valueFrom:
@@ -40,7 +43,6 @@ spec:
                   name: cf-api-key
                   key: CF_API_KEY
             
-            # Heavy 1.21.1 Modpack memory tuning
             - name: MEMORY
               value: "8G"
             - name: USE_AIKAR_FLAGS
@@ -62,7 +64,7 @@ spec:
             - name: mc-data
               mountPath: /data
 
-        # Container 2: Playit.gg Tunnel Sidecar (For External Friends)
+        # Container 2: Playit.gg Tunnel Sidecar
         - name: playit-agent
           image: ghcr.io/playit-cloud/playit-agent:0.17
           env:
@@ -91,11 +93,11 @@ metadata:
   name: minecraft-svc
   namespace: games
 spec:
-  type: NodePort # Exposed for Local LAN access
+  type: NodePort
   ports:
     - port: 25565
       targetPort: 25565
-      nodePort: 30565 # Fixed LAN port (Must be between 30000-32767)
+      nodePort: 30565
       name: mc-port
   selector:
     app: minecraft
