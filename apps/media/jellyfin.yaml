@@ -14,7 +14,7 @@ spec:
         app: jellyfin
     spec:
       nodeSelector:
-        kubernetes.io/hostname: homelab-worker1  # <-- Target the worker node
+        kubernetes.io/hostname: homelab  # <-- Target the worker node
       containers:
         - name: jellyfin
           image: jellyfin/jellyfin:latest
@@ -36,11 +36,11 @@ spec:
       volumes:
         - name: jellyfin-config
           hostPath:
-            path: /mnt/sata-storage/HDD2-share/jellyfin      # <-- Pointing to NFS mount
+            path: /mnt/HDD2/jellyfin      # <-- Pointing to NFS mount
             type: DirectoryOrCreate
         - name: jellyfin-media
           hostPath:
-            path: /mnt/sata-storage/HDD2-share/jellyfin      # <-- Pointing to NFS mount
+            path: /mnt/HDD2/jellyfin      # <-- Pointing to NFS mount
             type: Directory
         - name: dri
           hostPath:

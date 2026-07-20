@@ -14,7 +14,7 @@ spec:
         app: qbittorrent
     spec:
       nodeSelector:
-        kubernetes.io/hostname: homelab-worker1   # <-- Target the worker node
+        kubernetes.io/hostname: homelab   # <-- Target the worker node
       containers:
         - name: qbittorrent
           image: lscr.io/linuxserver/qbittorrent:latest
@@ -39,11 +39,11 @@ spec:
       volumes:
         - name: app-config
           hostPath:
-            path: /mnt/sata-storage/HDD2-share/media-stack          # <-- Points to the NFS mount on worker
+            path: /mnt/HDD2/media-stack          # <-- Points to the NFS mount on worker
             type: Directory
         - name: download-pool
           hostPath:
-            path: /mnt/sata-storage/HDD2-share/media-stack/downloads # <-- Points to the NFS mount on worker
+            path: /mnt/HDD2/media-stack/downloads # <-- Points to the NFS mount on worker
             type: DirectoryOrCreate
 ---
 apiVersion: apps/v1
