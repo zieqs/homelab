@@ -4,7 +4,7 @@ metadata:
   name: minecraft-server
   namespace: games
 spec:
-  replicas: 1 # FIXED: Scaled up to 1 replica
+  replicas: 0 # FIXED: Scaled up to 1 replica
   selector:
     matchLabels:
       app: minecraft
