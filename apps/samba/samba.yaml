@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: samba
+  namespace: storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: samba
+  template:
+    metadata:
+      labels:
+        app: samba
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: homelab
+      hostNetwork: true
+      containers:
+        - name: samba
+          image: dperson/samba:latest
+          env:
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+            - name: WORKGROUP
+              value: "WORKGROUP"
+            - name: USER
+              valueFrom:
+                secretKeyRef:
+                  name: samba-secret
+                  key: user
+            - name: SHARE1
+              value: "hdd1;/storage/HDD1;yes;no;no;zieqs,theanuars"
+            - name: SHARE2
+              value: "hdd2;/storage/HDD2;yes;no;no;zieqs,theanuars"
+          volumeMounts:
+            - name: hdd1
+              mountPath: /storage/HDD1
+            - name: hdd2
+              mountPath: /storage/HDD2
+      volumes:
+        - name: hdd1
+          hostPath:
+            path: /mnt/HDD1
+            type: Directory
+        - name: hdd2
+          hostPath:
+            path: /mnt/HDD2
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: samba-svc
+  namespace: storage
+  annotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: "homelab-smb"
+spec:
+  ports:
+    - name: smb
+      port: 445
+      protocol: TCP
+      targetPort: 445
+    - name: netbios
+      port: 139
+      protocol: TCP
+      targetPort: 139
+  selector:
+    app: samba
