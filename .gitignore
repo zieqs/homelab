@@ -2,3 +2,5 @@ age.agekey
 **/secrets/*.yaml
 !**/secrets/*.enc.yaml
 
+.opencode
+.superpowers
