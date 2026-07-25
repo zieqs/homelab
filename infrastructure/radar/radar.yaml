@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: radar
+  namespace: radar
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: radar
+      version: ">=1.0.0" # Or lock to a specific chart version
+      sourceRef:
+        kind: HelmRepository
+        name: skyhook
+        namespace: radar
+  install:
+    remediation:
+      retries: 3
+  values:
+    # Set custom chart values here (e.g. Ingress)
+    ingress:
+      enabled: true
+      className: "traefik"
+      hosts:
+        - host: radar.zieqs.online
+          paths:
+            - path: /
+              pathType: Prefix
