@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: homelab-worker1  # <-- Target the worker node
       containers:
         - name: jellyfin
-          image: jellyfin/jellyfin:10.11.11
+          image: jellyfin/jellyfin:latest
           env:
             - name: TZ
               value: "Asia/Kuala_Lumpur"
@@ -25,36 +25,26 @@ spec:
             - containerPort: 8096
               name: http
           securityContext:
-            privileged: false
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
+            privileged: true # <-- Allows container to interface directly with the physical GPU hardware
           volumeMounts:
             - name: jellyfin-config
               mountPath: /config
             - name: jellyfin-media
               mountPath: /media
-            - name: tmp
-              mountPath: /tmp
-            - name: dri
+            - name: dri # <-- Mounts the GPU interface into the container runtime
               mountPath: /dev/dri
       volumes:
         - name: jellyfin-config
           hostPath:
-            path: /mnt/sata-storage/HDD2-share/jellyfin
+            path: /mnt/sata-storage/HDD2-share/jellyfin      # <-- Pointing to NFS mount
             type: DirectoryOrCreate
         - name: jellyfin-media
           hostPath:
-            path: /mnt/sata-storage/HDD2-share/jellyfin
+            path: /mnt/sata-storage/HDD2-share/jellyfin      # <-- Pointing to NFS mount
             type: Directory
-        - name: tmp
-          emptyDir:
-            medium: Memory
         - name: dri
           hostPath:
-            path: /dev/dri
+            path: /dev/dri                                    # <-- Exposes physical host GPU to Kubernetes
             type: Directory
 ---
 apiVersion: v1
