@@ -25,11 +25,23 @@ spec:
       labels:
         app: homarr
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       nodeSelector:
         kubernetes.io/hostname: homelab
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:latest
+          image: ghcr.io/homarr-labs/homarr:1.72.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: 7575
               name: http
