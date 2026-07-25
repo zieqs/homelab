@@ -19,7 +19,7 @@ spec:
       hostNetwork: true
       containers:
         - name: samba
-          image: dperson/samba:r43
+          image: dperson/samba:latest
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:

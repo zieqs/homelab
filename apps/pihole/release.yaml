@@ -17,9 +17,6 @@ spec:
   interval: 1h
   values:
     privileged: "false"
-    capabilities:
-      drop:
-        - ALL
 
     persistentVolumeClaim:
       enabled: true
