@@ -13,10 +13,6 @@ spec:
       labels:
         app: minecraft
     spec:
-      automountServiceAccountToken: false
-      securityContext:
-        fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch
       nodeSelector:
         kubernetes.io/hostname: homelab-worker1
       containers:
@@ -25,12 +21,6 @@ spec:
           image: itzg/minecraft-server:java21
           tty: true
           stdin: true
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: false
-            capabilities:
-              drop:
-                - ALL
           ports:
             - containerPort: 25565
               name: mc-port
@@ -38,11 +28,13 @@ spec:
             - name: EULA
               value: "TRUE"
             
+            # Use NEOFORGE directly since mod files are already extracted in /data
             - name: TYPE
               value: "NEOFORGE"
             - name: VERSION
               value: "1.21.1"
             
+            # Memory allocation for 1.21.1 NeoForge
             - name: MEMORY
               value: "8G"
             - name: USE_AIKAR_FLAGS
@@ -67,12 +59,6 @@ spec:
         # Container 2: Playit.gg Tunnel Sidecar
         - name: playit-agent
           image: ghcr.io/playit-cloud/playit-agent:0.17
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
           env:
             - name: SECRET_KEY
               valueFrom:

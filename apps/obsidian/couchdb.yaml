@@ -30,21 +30,9 @@ spec:
       labels:
         app: couchdb
     spec:
-      automountServiceAccountToken: false
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 5984
-        runAsGroup: 5984
-        fsGroup: 5984
       containers:
         - name: couchdb
           image: couchdb:3.4.2
-          securityContext:
-            allowPrivilegeEscalation: false
-            readOnlyRootFilesystem: true
-            capabilities:
-              drop:
-                - ALL
           env:
             - name: COUCHDB_USER
               valueFrom:

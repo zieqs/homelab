@@ -13,18 +13,12 @@ spec:
       labels:
         app: samba
     spec:
-      automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/hostname: homelab
       hostNetwork: true
       containers:
         - name: samba
-          image: dperson/samba:r43
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
+          image: dperson/samba:latest
           env:
             - name: TZ
               value: "Asia/Kuala_Lumpur"
