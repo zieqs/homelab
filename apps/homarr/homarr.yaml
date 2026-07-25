@@ -35,7 +35,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:latest
+          image: ghcr.io/homarr-labs/homarr:1.72.0
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: false
