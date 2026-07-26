@@ -18,6 +18,15 @@ spec:
         kubernetes.io/hostname: homelab-worker1  # <-- Target the worker node
       securityContext:
         supplementalGroups: [44, 104]
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /config"]
+          volumeMounts:
+            - name: jellyfin-config
+              mountPath: /config
+          securityContext:
+            runAsUser: 0
       containers:
         - name: jellyfin
           image: jellyfin/jellyfin:10.11.11
