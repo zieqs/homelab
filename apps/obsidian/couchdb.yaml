@@ -34,8 +34,8 @@ spec:
       containers:
         - name: couchdb
           image: couchdb:3.4.2
-          securityContext:
-            runAsNonRoot: true
+          # CouchDB official image runs as root internally
+          # securityContext:
           env:
             - name: COUCHDB_USER
               valueFrom:
