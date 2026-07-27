@@ -13,6 +13,7 @@ spec:
       labels:
         app: samba
     spec:
+      automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/hostname: homelab
       hostNetwork: true

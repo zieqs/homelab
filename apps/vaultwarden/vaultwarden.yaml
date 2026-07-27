@@ -26,6 +26,7 @@ spec:
         name: johanneskastl
         namespace: flux-system
   values:
+    automountServiceAccountToken: false
     persistence:
       data:
         enabled: true

@@ -15,6 +15,15 @@ spec:
         namespace: networking
       interval: 1h
   interval: 1h
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |
+              - op: add
+                path: /spec/template/spec/automountServiceAccountToken
+                value: false
   values:
     persistentVolumeClaim:
       enabled: true

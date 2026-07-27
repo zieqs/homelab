@@ -25,6 +25,7 @@ spec:
       labels:
         app: homarr
     spec:
+      automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/hostname: homelab
       containers:

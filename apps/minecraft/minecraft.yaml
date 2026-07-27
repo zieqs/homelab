@@ -13,6 +13,7 @@ spec:
       labels:
         app: minecraft
     spec:
+      automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/hostname: homelab-worker1
       containers:

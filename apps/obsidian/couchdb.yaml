@@ -30,6 +30,7 @@ spec:
       labels:
         app: couchdb
     spec:
+      automountServiceAccountToken: false
       containers:
         - name: couchdb
           image: couchdb:3.4.2
