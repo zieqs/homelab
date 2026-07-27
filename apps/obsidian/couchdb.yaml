@@ -35,8 +35,6 @@ spec:
         - name: couchdb
           image: couchdb:3.4.2
           securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
             runAsNonRoot: true
           env:
             - name: COUCHDB_USER
