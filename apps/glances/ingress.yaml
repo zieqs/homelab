@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: glances-ingress
-  namespace: kube-system
+  namespace: monitoring
 spec:
   ingressClassName: traefik 
   rules:
