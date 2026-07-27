@@ -36,7 +36,7 @@ spec:
             runAsGroup: 1000
             runAsNonRoot: true
           ports:
-            - containerPort: 7575
+            - containerPort: 3000
               name: http
           env:
             - name: SECRET_ENCRYPTION_KEY
@@ -62,7 +62,7 @@ spec:
     - name: http
       protocol: TCP
       port: 7575
-      targetPort: 7575
+      targetPort: 3000
   selector:
     app: homarr
   type: ClusterIP
