@@ -20,6 +20,10 @@ spec:
         # Container 1: NeoForge 1.21.1 Server
         - name: minecraft
           image: itzg/minecraft-server:java21
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
           tty: true
           stdin: true
           ports:
@@ -60,6 +64,10 @@ spec:
         # Container 2: Playit.gg Tunnel Sidecar
         - name: playit-agent
           image: ghcr.io/playit-cloud/playit-agent:0.17
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
           env:
             - name: SECRET_KEY
               valueFrom:

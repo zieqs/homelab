@@ -31,6 +31,10 @@ spec:
       containers:
         - name: homarr
           image: ghcr.io/homarr-labs/homarr:latest
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            runAsNonRoot: true
           ports:
             - containerPort: 7575
               name: http

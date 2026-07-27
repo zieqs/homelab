@@ -27,6 +27,10 @@ spec:
         namespace: flux-system
   values:
     automountServiceAccountToken: false
+    securityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      runAsNonRoot: true
     persistence:
       data:
         enabled: true
