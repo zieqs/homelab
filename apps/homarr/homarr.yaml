@@ -52,7 +52,6 @@ spec:
           persistentVolumeClaim:
             claimName: homarr-data-pvc
 ---
-apiVersion: v1
 kind: Service
 apiVersion: v1
 metadata:
