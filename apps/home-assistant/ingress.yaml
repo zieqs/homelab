@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ha-ingress
+  namespace: home-assistant
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: homeassistant.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ha-web-svc
+                port:
+                  number: 8123
