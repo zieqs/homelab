@@ -43,13 +43,13 @@ spec:
             httpGet:
               path: /api/health
               port: 8123
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /api/health
               port: 8123
-            initialDelaySeconds: 30
+            initialDelaySeconds: 120
             periodSeconds: 10
           resources:
             requests:
