@@ -26,10 +26,6 @@ spec:
         name: johanneskastl
         namespace: flux-system
   values:
-    image:
-      repository: dani-garcia/vaultwarden
-      tag: "1.36.0"
-      pullPolicy: IfNotPresent
     automountServiceAccountToken: false
     securityContext:
       runAsUser: 1000
