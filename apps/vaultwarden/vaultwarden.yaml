@@ -28,7 +28,7 @@ spec:
   values:
     image:
       repository: dani-garcia/vaultwarden
-      tag: "1.37.0"
+      tag: "1.36.0"
       pullPolicy: IfNotPresent
     automountServiceAccountToken: false
     securityContext:
