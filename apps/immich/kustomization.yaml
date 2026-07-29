@@ -5,3 +5,4 @@ resources:
 - repository.yaml
 - storage.yaml
 - release.yaml
+- secrets/immich-secret.enc.yaml
