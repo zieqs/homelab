@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - namespace.yaml
-  - homarr.yaml
-  - ingress.yaml
+  - deployment.yaml
+  - networking.yaml
+  - storage.yaml
   - secrets/homarr-secret.enc.yaml

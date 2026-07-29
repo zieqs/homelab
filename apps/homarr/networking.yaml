@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: homarr-web-svc
+  namespace: monitoring
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 7575
+      targetPort: 3000
+  selector:
+    app: homarr
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homarr-ingress
+  namespace: monitoring
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: homarr.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homarr-web-svc
+                port:
+                  number: 7575
