@@ -1,0 +1,100 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: immich
+  namespace: immich
+spec:
+  releaseName: immich
+  chart:
+    spec:
+      chart: immich
+      version: ">= 0.1.0"
+      sourceRef:
+        kind: HelmRepository
+        name: immich-charts
+        namespace: flux-system
+  interval: 10m
+  postRenderers:
+    - kustomize:
+        patches:
+          - target:
+              kind: Deployment
+            patch: |
+              - op: add
+                path: /spec/template/spec/automountServiceAccountToken
+                value: false
+  values:
+    image:
+      tag: "v1.120.2"
+
+    immich:
+      metrics:
+        enabled: false
+
+    persistence:
+      library:
+        existingClaim: immich-library-pvc
+
+    postgresql:
+      enabled: true
+      global:
+        postgresql:
+          auth:
+            database: immich
+            username: immich
+      primary:
+        persistence:
+          storageClass: "local-path"
+          size: 10Gi
+
+    redis:
+      enabled: true
+      auth:
+        enabled: true
+      master:
+        persistence:
+          storageClass: "local-path"
+          size: 1Gi
+
+    server:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+
+    microservices:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+
+    machine-learning:
+      enabled: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 512Mi
+
+    ingress:
+      main:
+        enabled: true
+        ingressClassName: traefik
+        annotations:
+          traefik.ingress.kubernetes.io/router.entrypoints: web
+        hosts:
+          - host: immich.zieqs.online
+            paths:
+              - path: /
+                pathType: Prefix
+
+    nodeSelector:
+      kubernetes.io/hostname: homelab
+  valuesFrom:
+    - kind: Secret
+      name: immich-secret
+      valuesKey: postgres-password
+      targetPath: postgresql.global.postgresql.auth.password
+    - kind: Secret
+      name: immich-secret
+      valuesKey: redis-password
+      targetPath: redis.auth.password
