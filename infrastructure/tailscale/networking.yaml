@@ -2,13 +2,13 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ts-pihole-dns
-  namespace: networking 
+  namespace: networking
   annotations:
     tailscale.com/expose: "true"
     tailscale.com/hostname: "cluster-pihole-dns"
 spec:
   selector:
-    app: pihole 
+    app: pihole
   ports:
     - name: dns-udp
       port: 53

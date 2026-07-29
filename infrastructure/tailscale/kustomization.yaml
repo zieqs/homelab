@@ -4,4 +4,4 @@ resources:
   - namespace.yaml
   - repository.yaml
   - release.yaml
-  - pihole-tailscale.yaml
+  - networking.yaml

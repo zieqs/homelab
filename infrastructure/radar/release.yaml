@@ -8,7 +8,7 @@ spec:
   chart:
     spec:
       chart: radar
-      version: ">=1.0.0" # Or lock to a specific chart version
+      version: ">=1.0.0"
       sourceRef:
         kind: HelmRepository
         name: skyhook
@@ -17,7 +17,6 @@ spec:
     remediation:
       retries: 3
   values:
-    # Set custom chart values here (e.g. Ingress)
     ingress:
       enabled: true
       className: "traefik"
