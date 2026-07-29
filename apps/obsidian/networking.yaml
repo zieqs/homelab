@@ -1,3 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb-svc
+  namespace: obsidian
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5984
+      targetPort: 5984
+  selector:
+    app: couchdb
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -7,7 +20,7 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
-    - host: couchdb.zieqs.online # You can change this to match your local domain naming scheme
+    - host: couchdb.zieqs.online
       http:
         paths:
           - path: /

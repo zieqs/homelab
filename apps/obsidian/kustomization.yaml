@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: obsidian
 resources:
   - namespace.yaml
-  - couchdb.yaml
-  - ingress.yaml
+  - deployment.yaml
+  - networking.yaml
+  - storage.yaml
   - secrets/couchdb-secret.enc.yaml
