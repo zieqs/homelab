@@ -3,6 +3,5 @@ kind: Kustomization
 namespace: media
 resources:
   - namespace.yaml
-  - jellyfin.yaml
-  - arr-stack.yaml
-  - torrent-stack.yaml
+  - deployment.yaml
+  - networking.yaml

@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyfin-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 8096
+      targetPort: 8096
+  selector:
+    app: jellyfin
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: radarr-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 7878
+      targetPort: 7878
+  selector:
+    app: radarr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarr-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 8989
+      targetPort: 8989
+  selector:
+    app: sonarr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jellyseerr-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 5055
+      targetPort: 5055
+  selector:
+    app: jellyseerr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bazarr-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 6767
+      targetPort: 6767
+  selector:
+    app: bazarr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qbittorrent-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: qbittorrent
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prowlarr-svc
+  namespace: media
+spec:
+  ports:
+    - name: http
+      port: 9696
+      targetPort: 9696
+  selector:
+    app: prowlarr
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jellyfin-ingress
+  namespace: media
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: jellyfin.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jellyfin-svc
+                port:
+                  number: 8096
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: arr-ingress
+  namespace: media
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: radarr.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: radarr-svc
+                port:
+                  number: 7878
+    - host: sonarr.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: sonarr-svc
+                port:
+                  number: 8989
+    - host: seerr.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: jellyseerr-svc
+                port:
+                  number: 5055
+    - host: bazarr.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: bazarr-svc
+                port:
+                  number: 6767
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: media-ingress
+  namespace: media
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: qbit.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: qbittorrent-svc
+                port:
+                  number: 8080
+    - host: prowlarr.zieqs.online
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: prowlarr-svc
+                port:
+                  number: 9696

@@ -1,6 +1,89 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: jellyfin
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jellyfin
+  template:
+    metadata:
+      labels:
+        app: jellyfin
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/hostname: homelab-worker1
+      securityContext:
+        supplementalGroups: [44, 104]
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /config"]
+          volumeMounts:
+            - name: jellyfin-config
+              mountPath: /config
+          securityContext:
+            runAsUser: 0
+      containers:
+        - name: jellyfin
+          image: jellyfin/jellyfin:10.11.11
+          env:
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+          ports:
+            - containerPort: 8096
+              name: http
+          readinessProbe:
+            tcpSocket:
+              port: 8096
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8096
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+          volumeMounts:
+            - name: jellyfin-config
+              mountPath: /config
+            - name: jellyfin-media
+              mountPath: /media
+            - name: dri
+              mountPath: /dev/dri
+      volumes:
+        - name: jellyfin-config
+          hostPath:
+            path: /mnt/sata-storage/HDD2-share/jellyfin
+            type: DirectoryOrCreate
+        - name: jellyfin-media
+          hostPath:
+            path: /mnt/sata-storage/HDD2-share/jellyfin
+            type: Directory
+        - name: dri
+          hostPath:
+            path: /dev/dri
+            type: Directory
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: radarr
   namespace: media
 spec:
@@ -122,45 +205,36 @@ spec:
       automountServiceAccountToken: false
       nodeSelector:
         kubernetes.io/hostname: homelab
-      
-      # 1. Pod-level security (FIXED: changed 'podSecurityContext' to 'securityContext')
       securityContext:
         fsGroup: 1000
-        fsGroupChangePolicy: OnRootMismatch   # Excellent choice! Speeds up starting times immensely.
-      
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: jellyseerr
           image: seerr/seerr:latest
-          
-          # 2. Container-level security
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-            readOnlyRootFilesystem: false   # Correct, Seerr needs write access here
+            readOnlyRootFilesystem: false
             runAsNonRoot: true
             privileged: false
             runAsUser: 1000
             runAsGroup: 1000
             seccompProfile:
               type: RuntimeDefault
-          
           env:
             - name: LOG_LEVEL
               value: "debug"
             - name: TZ
               value: "Asia/Kuala_Lumpur"
-          
           ports:
             - containerPort: 5055
               name: http
-          
           volumeMounts:
             - name: app-config
               mountPath: /app/config
               subPath: seerr
-      
       volumes:
         - name: app-config
           hostPath:
@@ -201,11 +275,11 @@ spec:
           volumeMounts:
             - name: app-config
               mountPath: /config
-              subPath: bazarr            # Uses your existing media-stack/bazarr folder
+              subPath: bazarr
             - name: movie-library
-              mountPath: /media/movies  # Let Bazarr find movie directories
+              mountPath: /media/movies
             - name: tv-library
-              mountPath: /media/series  # Let Bazarr find tv directories
+              mountPath: /media/series
       volumes:
         - name: app-config
           hostPath:
@@ -220,103 +294,92 @@ spec:
             path: /mnt/HDD2/jellyfin/series
             type: Directory
 ---
-apiVersion: v1
-kind: Service
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: radarr-svc
+  name: qbittorrent
   namespace: media
 spec:
-  ports:
-    - name: http
-      port: 7878
-      targetPort: 7878
+  replicas: 1
   selector:
-    app: radarr
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/hostname: homelab-worker1
+      containers:
+        - name: qbittorrent
+          image: lscr.io/linuxserver/qbittorrent:latest
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+            - name: WEBUI_PORT
+              value: "8080"
+          ports:
+            - containerPort: 8080
+              name: webui
+          volumeMounts:
+            - name: app-config
+              mountPath: /config
+              subPath: qbittorrent
+            - name: download-pool
+              mountPath: /downloads
+      volumes:
+        - name: app-config
+          hostPath:
+            path: /mnt/sata-storage/HDD2-share/media-stack
+            type: Directory
+        - name: download-pool
+          hostPath:
+            path: /mnt/sata-storage/HDD2-share/media-stack/downloads
+            type: DirectoryOrCreate
 ---
-apiVersion: v1
-kind: Service
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: sonarr-svc
+  name: prowlarr
   namespace: media
 spec:
-  ports:
-    - name: http
-      port: 8989
-      targetPort: 8989
+  replicas: 1
   selector:
-    app: sonarr
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: jellyseerr-svc
-  namespace: media
-spec:
-  ports:
-    - name: http
-      port: 5055
-      targetPort: 5055
-  selector:
-    app: jellyseerr
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: bazarr-svc
-  namespace: media
-spec:
-  ports:
-    - name: http
-      port: 6767
-      targetPort: 6767
-  selector:
-    app: bazarr
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: arr-ingress
-  namespace: media
-spec:
-  ingressClassName: traefik
-  rules:
-    - host: radarr.zieqs.online
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: radarr-svc
-                port:
-                  number: 7878
-    - host: sonarr.zieqs.online
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: sonarr-svc
-                port:
-                  number: 8989
-    - host: seerr.zieqs.online
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: jellyseerr-svc
-                port:
-                  number: 5055
-    - host: bazarr.zieqs.online           # Added Bazarr ingress route here
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: bazarr-svc
-                port:
-                  number: 6767
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      automountServiceAccountToken: false
+      nodeSelector:
+        kubernetes.io/hostname: homelab
+      containers:
+        - name: prowlarr
+          image: lscr.io/linuxserver/prowlarr:latest
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: "Asia/Kuala_Lumpur"
+          ports:
+            - containerPort: 9696
+              name: webui
+          volumeMounts:
+            - name: app-config
+              mountPath: /config
+              subPath: prowlarr
+      volumes:
+        - name: app-config
+          hostPath:
+            path: /mnt/HDD2/media-stack
+            type: Directory
