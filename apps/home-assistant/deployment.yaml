@@ -29,15 +29,15 @@ spec:
               value: Asia/Kuala_Lumpur
           livenessProbe:
             httpGet:
-              path: /api/health
+              path: /
               port: 8123
-            initialDelaySeconds: 120
+            initialDelaySeconds: 60
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /api/health
+              path: /
               port: 8123
-            initialDelaySeconds: 120
+            initialDelaySeconds: 30
             periodSeconds: 10
           resources:
             requests:
