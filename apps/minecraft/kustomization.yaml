@@ -3,6 +3,7 @@ kind: Kustomization
 namespace: games
 resources:
   - namespace.yaml
-  - minecraft.yaml
+  - deployment.yaml
+  - networking.yaml
   - secrets/minecraft-secret.enc.yaml
   - secrets/cf-api-key.enc.yaml

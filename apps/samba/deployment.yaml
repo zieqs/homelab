@@ -48,24 +48,3 @@ spec:
           hostPath:
             path: /mnt/HDD2
             type: Directory
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: samba-svc
-  namespace: storage
-  annotations:
-    tailscale.com/expose: "true"
-    tailscale.com/hostname: "homelab-smb"
-spec:
-  ports:
-    - name: smb
-      port: 445
-      protocol: TCP
-      targetPort: 445
-    - name: netbios
-      port: 139
-      protocol: TCP
-      targetPort: 139
-  selector:
-    app: samba

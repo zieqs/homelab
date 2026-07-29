@@ -17,7 +17,6 @@ spec:
       nodeSelector:
         kubernetes.io/hostname: homelab-worker1
       containers:
-        # Container 1: NeoForge 1.21.1 Server
         - name: minecraft
           image: itzg/minecraft-server:java21
           securityContext:
@@ -32,14 +31,10 @@ spec:
           env:
             - name: EULA
               value: "TRUE"
-            
-            # Use NEOFORGE directly since mod files are already extracted in /data
             - name: TYPE
               value: "NEOFORGE"
             - name: VERSION
               value: "1.21.1"
-            
-            # Memory allocation for 1.21.1 NeoForge
             - name: MEMORY
               value: "8G"
             - name: USE_AIKAR_FLAGS
@@ -60,8 +55,6 @@ spec:
           volumeMounts:
             - name: mc-data
               mountPath: /data
-
-        # Container 2: Playit.gg Tunnel Sidecar
         - name: playit-agent
           image: ghcr.io/playit-cloud/playit-agent:0.17
           securityContext:
@@ -81,24 +74,8 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "500m"
-
       volumes:
         - name: mc-data
           hostPath:
             path: /mnt/sata-storage/minecraft-data
             type: DirectoryOrCreate
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: minecraft-svc
-  namespace: games
-spec:
-  type: NodePort
-  ports:
-    - port: 25565
-      targetPort: 25565
-      nodePort: 30565
-      name: mc-port
-  selector:
-    app: minecraft

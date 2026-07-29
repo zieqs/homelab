@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: storage
 resources:
   - namespace.yaml
-  - samba.yaml
+  - deployment.yaml
+  - networking.yaml
   - secrets/samba-secret.enc.yaml
