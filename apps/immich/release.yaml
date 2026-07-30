@@ -30,39 +30,55 @@ spec:
     immich:
       metrics:
         enabled: false
+      persistence:
+        library:
+          existingClaim: immich-library-pvc
+      configurationKind: ConfigMap
+      configuration: {}
 
-    persistence:
-      library:
-        existingClaim: immich-library-pvc
+    controllers:
+      main:
+        containers:
+          main:
+            env:
+              DB_HOSTNAME: immich-postgres
+              DB_USERNAME: immich
+              DB_DATABASE_NAME: immich
+              DB_PASSWORD:
+                valueFrom:
+                  secretKeyRef:
+                    name: immich-secret
+                    key: postgres-password
 
-    postgresql:
+    valkey:
       enabled: true
-      global:
-        postgresql:
-          auth:
-            database: immich
-            username: immich
-      primary:
-        persistence:
-          storageClass: "local-path"
-          size: 10Gi
-
-    redis:
-      enabled: true
-      auth:
-        enabled: true
-      master:
-        persistence:
-          storageClass: "local-path"
+      persistence:
+        data:
+          enabled: true
+          type: persistentVolumeClaim
           size: 1Gi
+          storageClass: local-path
 
     server:
+      enabled: true
       resources:
         requests:
           cpu: 100m
           memory: 512Mi
+      ingress:
+        main:
+          enabled: true
+          ingressClassName: traefik
+          annotations:
+            traefik.ingress.kubernetes.io/router.entrypoints: web
+          hosts:
+            - host: immich.zieqs.online
+              paths:
+                - path: /
+                  pathType: Prefix
 
     microservices:
+      enabled: true
       resources:
         requests:
           cpu: 100m
@@ -75,26 +91,5 @@ spec:
           cpu: 100m
           memory: 512Mi
 
-    ingress:
-      main:
-        enabled: true
-        ingressClassName: traefik
-        annotations:
-          traefik.ingress.kubernetes.io/router.entrypoints: web
-        hosts:
-          - host: immich.zieqs.online
-            paths:
-              - path: /
-                pathType: Prefix
-
     nodeSelector:
       kubernetes.io/hostname: homelab
-  valuesFrom:
-    - kind: Secret
-      name: immich-secret
-      valuesKey: postgres-password
-      targetPath: postgresql.global.postgresql.auth.password
-    - kind: Secret
-      name: immich-secret
-      valuesKey: redis-password
-      targetPath: redis.auth.password
