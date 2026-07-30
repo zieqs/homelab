@@ -31,7 +31,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: postgres
-          image: docker.io/postgres:16-alpine
+          image: docker.io/pgvector/pgvector:pg16
           env:
             - name: POSTGRES_USER
               value: immich
