@@ -20,7 +20,7 @@ spec:
         supplementalGroups: [44, 104]
       initContainers:
         - name: fix-permissions
-          image: busybox
+          image: busybox:1.38.0
           command: ["sh", "-c", "chown -R 1000:1000 /config"]
           volumeMounts:
             - name: jellyfin-config
@@ -210,7 +210,7 @@ spec:
         fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: jellyseerr
-          image: seerr/seerr:latest
+          image: seerr/seerr:v3.4.0
           securityContext:
             allowPrivilegeEscalation: false
             capabilities:
