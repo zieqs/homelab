@@ -10,9 +10,6 @@
   "flux": {
     "enabled": true
   },
-  "docker": {
-    "pinDigests": true
-  },
   "ignorePaths": [
     "clusters/homelab/flux-system/**"
   ],
@@ -28,6 +25,12 @@
     }
   ],
   "packageRules": [
+    {
+      "matchCategories": [
+        "docker"
+      ],
+      "pinDigests": true
+    },
     {
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["major"],
