@@ -3,27 +3,30 @@
   "extends": [
     "config:recommended"
   ],
-  "docker": {
-    "pinDigests": true
+  "flux": {
+    "enabled": true
   },
-  "flux": true,
   "ignorePaths": [
     "clusters/homelab/flux-system/**"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
+      "customType": "regex",
       "description": "Track itzg/minecraft-server:java21 digest and VERSION env",
-      "fileMatch": ["apps/minecraft/deployment.yaml"],
-      "matchStrings": [
-        "image: itzg/minecraft-server:(?<currentValue>java21)",
-        "VERSION: \"(?<currentValue>.*)\""
-      ],
+      "managerFilePatterns": ["/apps/minecraft/deployment.yaml/"],
+      "matchStrings": ["image: itzg/minecraft-server:(?<currentValue>java21)", "VERSION: \"(?<currentValue>.*)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "itzg/minecraft-server",
       "versioningTemplate": "docker"
     }
   ],
   "packageRules": [
+    {
+      "matchCategories": [
+        "docker"
+      ],
+      "pinDigests": true
+    },
     {
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["major"],
