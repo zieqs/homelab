@@ -6,16 +6,16 @@
   ],
   "kubernetes": {
     "enabled": true,
-    "fileMatch": [
-      "apps/*/deployment.yaml",
-      "infrastructure/*/deployment.yaml"
+    "managerFilePatterns": [
+      "/apps/*/deployment.yaml/",
+      "/infrastructure/*/deployment.yaml/"
     ]
   },
   "helm-values": {
     "enabled": true,
-    "fileMatch": [
-      "apps/*/release.yaml",
-      "infrastructure/*/release.yaml"
+    "managerFilePatterns": [
+      "/apps/*/release.yaml/",
+      "/infrastructure/*/release.yaml/"
     ]
   },
   "flux": {
