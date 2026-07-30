@@ -1,10 +1,17 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended" , ":dependencyDashboard"
+    "config:recommended",
+    ":dependencyDashboard"
   ],
+  "kubernetes": {
+    "enabled": true
+  },
   "flux": {
     "enabled": true
+  },
+  "docker": {
+    "pinDigests": true
   },
   "ignorePaths": [
     "clusters/homelab/flux-system/**"
@@ -13,7 +20,7 @@
     {
       "customType": "regex",
       "description": "Track itzg/minecraft-server:java21 digest and VERSION env",
-      "managerFilePatterns": ["/apps/minecraft/deployment.yaml/"],
+      "managerFilePatterns": ["apps/minecraft/deployment.yaml"],
       "matchStrings": ["image: itzg/minecraft-server:(?<currentValue>java21)", "VERSION: \"(?<currentValue>.*)\""],
       "datasourceTemplate": "docker",
       "depNameTemplate": "itzg/minecraft-server",
@@ -21,12 +28,6 @@
     }
   ],
   "packageRules": [
-    {
-      "matchCategories": [
-        "docker"
-      ],
-      "pinDigests": true
-    },
     {
       "matchDatasources": ["docker"],
       "matchUpdateTypes": ["major"],
