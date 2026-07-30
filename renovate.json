@@ -5,7 +5,18 @@
     ":dependencyDashboard"
   ],
   "kubernetes": {
-    "enabled": true
+    "enabled": true,
+    "fileMatch": [
+      "apps/*/deployment.yaml",
+      "infrastructure/*/deployment.yaml"
+    ]
+  },
+  "helm-values": {
+    "enabled": true,
+    "fileMatch": [
+      "apps/*/release.yaml",
+      "infrastructure/*/release.yaml"
+    ]
   },
   "flux": {
     "enabled": true
