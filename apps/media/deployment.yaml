@@ -314,7 +314,7 @@ spec:
         kubernetes.io/hostname: homelab-worker1
       containers:
         - name: qbittorrent
-          image: lscr.io/linuxserver/qbittorrent:latest
+          image: lscr.io/linuxserver/qbittorrent:5.2.3
           env:
             - name: PUID
               value: "1000"
