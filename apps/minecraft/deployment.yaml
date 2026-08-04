@@ -56,7 +56,7 @@ spec:
             - name: mc-data
               mountPath: /data
         - name: playit-agent
-          image: ghcr.io/playit-cloud/playit-agent:0.17
+          image: ghcr.io/playit-cloud/playit-agent:1.0
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
