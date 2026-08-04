@@ -101,7 +101,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: radarr
-          image: lscr.io/linuxserver/radarr:latest
+          image: lscr.io/linuxserver/radarr:6.3.0
           env:
             - name: PUID
               value: "1000"
