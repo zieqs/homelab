@@ -363,7 +363,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: prowlarr
-          image: lscr.io/linuxserver/prowlarr:2.5.2.5491
+          image: lscr.io/linuxserver/prowlarr:2.6.2-nightly
           env:
             - name: PUID
               value: "1000"
