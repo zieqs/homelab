@@ -22,17 +22,26 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Track itzg/minecraft-server:java21 image tag",
+      "description": "Track itzg/minecraft-server:java21 image tag and digest",
       "managerFilePatterns": [
         "/(^|/)apps/minecraft/deployment\\.yaml$/"
       ],
       "matchStrings": [
-        "image:\\s*(?<depName>itzg/minecraft-server):(?<currentValue>[^\\s\"]+)"
+        "image:\\s*(?<depName>itzg/minecraft-server):(?<currentValue>java21)(?:@(?<currentDigest>sha256:[a-f0-9]+))?"
       ],
       "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
+    {
+      "matchManagers": ["flux"],
+      "matchDatasources": ["helm"],
+      "registryAliases": {
+        "johanneskastl": "https://johanneskastl.github.io/helm-charts",
+        "pihole": "https://mojo2600.github.io/pihole-kubernetes",
+        "tailscale": "https://pkgs.tailscale.com/helm"
+      }
+    },
     {
       "matchCategories": [
         "docker"
