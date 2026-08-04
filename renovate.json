@@ -5,21 +5,16 @@
     ":dependencyDashboard"
   ],
   "kubernetes": {
-    "enabled": true,
-    "managerFilePatterns": [
-      "/apps/*/deployment.yaml/",
-      "/infrastructure/*/deployment.yaml/"
-    ]
-  },
-  "helm-values": {
-    "enabled": true,
-    "managerFilePatterns": [
-      "/apps/*/release.yaml/",
-      "/infrastructure/*/release.yaml/"
+    "fileMatch": [
+      "(^|/)apps/.+/deployment\\.yaml$",
+      "(^|/)infrastructure/.+/deployment\\.yaml$"
     ]
   },
   "flux": {
-    "enabled": true
+    "fileMatch": [
+      "(^|/)apps/.+/release\\.yaml$",
+      "(^|/)infrastructure/.+/release\\.yaml$"
+    ]
   },
   "ignorePaths": [
     "clusters/homelab/flux-system/**"
@@ -27,12 +22,12 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Track itzg/minecraft-server:java21 digest and VERSION env",
-      "managerFilePatterns": ["apps/minecraft/deployment.yaml"],
-      "matchStrings": ["image: itzg/minecraft-server:(?<currentValue>java21)", "VERSION: \"(?<currentValue>.*)\""],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "itzg/minecraft-server",
-      "versioningTemplate": "docker"
+      "description": "Track itzg/minecraft-server:java21 image tag",
+      "fileMatch": ["(^|/)apps/minecraft/deployment\\.yaml$"],
+      "matchStrings": [
+        "image:\\s*(?<depName>itzg/minecraft-server):(?<currentValue>[^\\s\"]+)"
+      ],
+      "datasourceTemplate": "docker"
     }
   ],
   "packageRules": [
