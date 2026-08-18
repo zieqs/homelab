@@ -6,20 +6,20 @@ A GitOps-driven Kubernetes homelab. Every service lives in this repo as a Kubern
 
 | Service | Namespace | What it does |
 |---|---|---|
-| **[Pi-hole](https://pi-hole.net/)** | `networking` | DNS ad-blocking for the LAN. Web UI at `pihole.zieqs.online`, also exposed over Tailscale at `cluster-pihole-dns`. |
+| **[Pi-hole](https://pi-hole.net/)** | `networking` | DNS ad-blocking for the LAN, also exposed over Tailscale. |
 | **[Tailscale Operator](https://tailscale.com/kubernetes-operator)** | `tailscale` | Mesh VPN + subnet router for `192.168.0.0/24`. Exposes services via `tailscale.com/expose`. |
 | **[Cloudflare Tunnel](https://www.cloudflare.com/products/tunnel/)** | `networking` | Cloudflare-backed ingress for external access. |
-| **Radar** | `radar` | Cluster dashboard / observability UI at `radar.zieqs.online`. |
-| **[Glances](https://nicolargo.github.io/glances/)** | `monitoring` | System monitoring — master at `glancesmaster.zieqs.online`, worker at `glancesworkerone.zieqs.online`. |
-| **[Homarr](https://homarr.dev/)** | `monitoring` | Dashboard / startpage at `homarr.zieqs.online`. |
-| **[Home Assistant](https://www.home-assistant.io/)** | `home-assistant` | Home automation at `homeassistant.zieqs.online` (master node). |
-| **[Samba](https://www.samba.org/)** | `storage` | File sharing for HDD1/HDD2, exposed over Tailscale at `homelab-smb`. |
-| **[Jellyfin](https://jellyfin.org/)** | `media` | Media server at `jellyfin.zieqs.online` with GPU passthrough on the worker node. |
-| **Radarr / Sonarr / Jellyseerr / Bazarr** | `media` | Radarr at `radarr.zieqs.online`, Sonarr at `sonarr.zieqs.online`, Jellyseerr at `seerr.zieqs.online`, Bazarr at `bazarr.zieqs.online`. |
-| **qBittorrent / Prowlarr** | `media` | Torrent client at `qbit.zieqs.online` (worker node), indexer manager at `prowlarr.zieqs.online` (master node). |
-| **[CouchDB](https://couchdb.apache.org/)** 3.5.2 | `obsidian` | [Obsidian Livesync](https://github.com/vrtmrz/obsidian-livesync) backend at `couchdb.zieqs.online`. 10Gi PVC. |
+| **Radar** | `radar` | Cluster dashboard / observability UI. |
+| **[Glances](https://nicolargo.github.io/glances/)** | `monitoring` | System monitoring — a master + worker instance, one per node. |
+| **[Homarr](https://homarr.dev/)** | `monitoring` | Dashboard / startpage. |
+| **[Home Assistant](https://www.home-assistant.io/)** | `home-assistant` | Home automation (master node). |
+| **[Samba](https://www.samba.org/)** | `storage` | File sharing for HDD1/HDD2, exposed over Tailscale. |
+| **[Jellyfin](https://jellyfin.org/)** | `media` | Media server with GPU passthrough on the worker node. |
+| **Radarr / Sonarr / Jellyseerr / Bazarr** | `media` | Movie/TV management, request and subtitle tooling (on the master node). |
+| **qBittorrent / Prowlarr** | `media` | Torrent client (worker node), indexer manager (master node). |
+| **[CouchDB](https://couchdb.apache.org/)** 3.5.2 | `obsidian` | [Obsidian Livesync](https://github.com/vrtmrz/obsidian-livesync) backend. 10Gi PVC. |
 | **Minecraft** | `games` | NeoForge 1.21.1 server on the worker node (8G RAM), exposed via a [playit.gg](https://playit.gg) tunnel. |
-| **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)** | `vaultwarden` | Bitwarden-compatible password manager at `vaultwarden.zieqs.online`. 10Gi PVC. |
+| **[Vaultwarden](https://github.com/dani-garcia/vaultwarden)** | `vaultwarden` | Bitwarden-compatible password manager. 10Gi PVC. |
 
 ## Architecture
 
@@ -152,9 +152,9 @@ kubectl create secret generic sops-age \
 ## Highlights
 
 - **Pi-hole** — community Helm chart, LAN-wide DNS via a LoadBalancer service, password injected from a SOPS secret, 5Gi `local-path` storage.
-- **Media stack** — Jellyfin with `/dev/dri` GPU passthrough on the worker, the *arr suite + Prowlarr on the master (hostPath at `/mnt/HDD2/media-stack`), qBittorrent downloads on the worker. All behind Traefik ingresses on `*.zieqs.online`.
+- **Media stack** — Jellyfin with `/dev/dri` GPU passthrough on the worker, the *arr suite + Prowlarr on the master (hostPath at `/mnt/HDD2/media-stack`), qBittorrent downloads on the worker. All behind Traefik ingresses.
 - **Home Assistant** — pinned to the master node, 2Gi PVC, `Recreate` strategy.
-- **Samba** — hostNetwork on the master sharing HDD1/HDD2, exposed over Tailscale as `homelab-smb`.
+- **Samba** — hostNetwork on the master sharing HDD1/HDD2, exposed over Tailscale.
 - **Minecraft** — NeoForge 1.21.1 (`itzg/minecraft-server:java21`), 8G RAM on the worker, storage at `/mnt/sata-storage/minecraft-data`, external access via a playit.gg sidecar. Currently scaled to 0.
 - **Radar** — Helm-installed cluster dashboard/observability UI.
 - **Glances** — master + worker deployments with `hostPID` and Docker socket access for full system visibility.
