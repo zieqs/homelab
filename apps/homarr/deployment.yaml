@@ -18,7 +18,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:v1.76.0
+          image: ghcr.io/homarr-labs/homarr:v1.76.2
           securityContext:
             runAsUser: 1000
             runAsGroup: 1000
