@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: cloudflared
-          image: cloudflare/cloudflared:2026.9.1
+          image: cloudflare/cloudflared:2026.9.3
           command: ["cloudflared", "tunnel", "--no-autoupdate", "run", "--token", "$(CLOUDFLARED_TOKEN)"]
           env:
             - name: CLOUDFLARED_TOKEN
