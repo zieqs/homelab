@@ -254,7 +254,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: bazarr
-          image: lscr.io/linuxserver/bazarr:1.6.1
+          image: lscr.io/linuxserver/bazarr:1.6.2
           env:
             - name: PUID
               value: "1000"
