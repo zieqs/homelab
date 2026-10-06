@@ -22,7 +22,7 @@ spec:
         supplementalGroups: [44, 104]
       containers:
         - name: jellyfin
-          image: jellyfin/jellyfin:12.1
+          image: jellyfin/jellyfin:12.2
           env:
             - name: TZ
               value: "Asia/Kuala_Lumpur"
