@@ -35,6 +35,23 @@ spec:
         app: couchdb
     spec:
       automountServiceAccountToken: false
+      initContainers:
+        # The CouchDB entrypoint chowns everything under /opt/couchdb that is not
+        # already owned by couchdb:couchdb, and runs under `set -e`. A ConfigMap
+        # mount is read-only, so that chown fails and the pod exits 1 before
+        # CouchDB ever starts. Stage the file on a writable emptyDir instead.
+        - name: cors-config
+          image: couchdb:3.5.3
+          command:
+            - sh
+            - -c
+            - install -o 5984 -g 5984 -m 0644 /src/20-cors.ini /dst/20-cors.ini
+          volumeMounts:
+            - name: couchdb-config
+              mountPath: /src
+              readOnly: true
+            - name: couchdb-local-d
+              mountPath: /dst
       containers:
         - name: couchdb
           image: couchdb:3.5.3
@@ -55,7 +72,7 @@ spec:
           volumeMounts:
             - name: couchdb-storage
               mountPath: /opt/couchdb/data
-            - name: couchdb-config
+            - name: couchdb-local-d
               mountPath: /opt/couchdb/etc/local.d/20-cors.ini
               subPath: 20-cors.ini
       volumes:
@@ -65,3 +82,5 @@ spec:
         - name: couchdb-config
           configMap:
             name: couchdb-config
+        - name: couchdb-local-d
+          emptyDir: {}
