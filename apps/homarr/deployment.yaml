@@ -19,14 +19,17 @@ spec:
       containers:
         - name: homarr
           image: ghcr.io/homarr-labs/homarr:v2.5.2
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-            runAsNonRoot: true
+          # NOTE: homarr's entrypoint starts as root to configure nginx, then runs
+          # the app as PUID/PGID. Forcing runAsNonRoot/runAsUser here breaks nginx
+          # startup (see homarr-labs/homarr#2597). The app process still runs as 1000.
           ports:
             - containerPort: 3000
               name: http
           env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
             - name: SECRET_ENCRYPTION_KEY
               valueFrom:
                 secretKeyRef:
