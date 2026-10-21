@@ -18,7 +18,7 @@ spec:
         kubernetes.io/hostname: homelab
       containers:
         - name: homarr
-          image: ghcr.io/homarr-labs/homarr:v2.5.2
+          image: ghcr.io/homarr-labs/homarr:v2.7.0
           # NOTE: homarr's entrypoint starts as root to configure nginx, then runs
           # the app as PUID/PGID. Forcing runAsNonRoot/runAsUser here breaks nginx
           # startup (see homarr-labs/homarr#2597). The app process still runs as 1000.
